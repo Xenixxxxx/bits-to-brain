@@ -1,0 +1,48 @@
+# ====================
+# Global
+# ====================
+.DS_Store
+*.log
+*.tmp
+*.swp
+.env
+.env.local
+.env.*.local
+
+# node_modules (frontend)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# IDE & Editor
+.idea/
+.vscode/
+*.iml
+*.classpath
+*.project
+*.settings/
+
+# OS Generated
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ====================
+# Java / Spring Boot (backend)
+# ====================
+/backend/target/
+/backend/.mvn/
+!**/src/main/resources/static/
+**/application-dev.yml
+**/application-prod.yml
+**/application.properties
+**/application.yml
+
+# Build tools
+*.war
+*.jar
+
+
+*.bak
+*.old
+docker-compose.override.yml
