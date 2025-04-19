@@ -41,7 +41,7 @@ public class AzureOpenAiChat {
                     .apiKey(apiKey)
                     .deploymentName(deploymentId)
                     .temperature(0.1)
-                    .maxTokens(500)
+                    .maxTokens(300)
                     .build();
 
             logger.info("Azure OpenAI Chat Model initialized successfully");
