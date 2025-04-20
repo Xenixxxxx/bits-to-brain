@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  db:
+    image: ankane/pgvector
+    container_name: bits2brain-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: bits2brain
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+#      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  pgdata:
