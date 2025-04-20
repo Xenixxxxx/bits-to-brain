@@ -5,8 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.bits2brain.backend.agent.models.AzureOpenAiChat;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingStore;
@@ -27,12 +32,15 @@ public class KnowledgeService {
     private final Neo4jClient neo4jClient;
     private final EmbeddingStore<TextSegment> embeddingStore;
     private final EmbeddingModel embeddingModel;
+    private final ChatLanguageModel chatLanguageModel;
 
     @Autowired
-    public KnowledgeService(EmbeddingModel embeddingModel, EmbeddingStore<TextSegment> vectorStore, Neo4jClient neo4jClient) {
+    public KnowledgeService(EmbeddingModel embeddingModel, EmbeddingStore<TextSegment> vectorStore,
+                            Neo4jClient neo4jClient, AzureOpenAiChat chatModelProvider) {
         this.embeddingStore = vectorStore;
         this.embeddingModel = embeddingModel;
         this.neo4jClient = neo4jClient;
+        this.chatLanguageModel = chatModelProvider.get();
     }
 
     @PostConstruct
@@ -92,6 +100,7 @@ public class KnowledgeService {
                 """).bindAll(Map.of("fromId", fromId, "toId", toId, "score", score)).run();
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, Object> getNodeByUuid(String uuid) {
         return (Map<String, Object>) neo4jClient.query("""
             MATCH (n {uuid: $uuid})
@@ -109,4 +118,47 @@ public class KnowledgeService {
                 .orElseThrow(() -> new RuntimeException("Node not found for uuid: " + uuid));
     }
 
+
+    public List<Map<String, Object>> recommendRelatedNodes(String fromId) {
+        Map<String, Object> node = getNodeByUuid(fromId);
+        String title = (String) node.get("title");
+        String summary = (String) node.get("text");
+
+        if (summary == null || summary.isEmpty()) {
+            log.error("[KnowledgeService] No summary found for node with ID: {}", fromId);
+            return List.of();
+        }
+
+        String prompt = String.format("""
+    You are a smart knowledge assistant helping to expand a knowledge graph.
+
+    Given the following node:
+    Title: "%s"
+    Content: "%s"
+
+    Please recommend 3 new, distinct knowledge nodes that are related to the original content.
+    For each recommended node, include:
+    - A concise and meaningful title
+    - A one or two sentence summary explaining the topic
+
+    Return the results strictly in **JSON array format**, like:
+    [
+      {"title": "Title A", "summary": "Summary of A..."},
+      {"title": "Title B", "summary": "Summary of B..."},
+      {"title": "Title C", "summary": "Summary of C..."}
+    ]
+    """, title, summary);
+
+        String result = chatLanguageModel.chat(prompt);
+        log.info("[KnowledgeService] Recommendation result for '{}':\n{}", title, result);
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(result, new TypeReference<>() {}
+            );
+        } catch (Exception e) {
+            log.warn("[KnowledgeService] Failed to parse recommendation result, returning raw result", e);
+            return List.of(Map.of("raw", result));
+        }
+    }
 }
