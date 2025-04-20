@@ -38,7 +38,7 @@ public class KnowledgeService {
     @PostConstruct
     public void verifyNeo4jConnection() {
         neo4jClient.query("RETURN 1").run();
-        log.info("✅ Connected to Neo4j");
+        log.info("Connected to Neo4j");
     }
 
 
@@ -91,4 +91,22 @@ public class KnowledgeService {
                 MERGE (a)-[r:SIMILAR {score: $score}]->(b)
                 """).bindAll(Map.of("fromId", fromId, "toId", toId, "score", score)).run();
     }
+
+    public Map<String, Object> getNodeByUuid(String uuid) {
+        return (Map<String, Object>) neo4jClient.query("""
+            MATCH (n {uuid: $uuid})
+            RETURN n.title AS title, n.text AS text, n.createdAt AS createdAt, n.type AS type
+        """)
+                .bind(uuid).to("uuid")
+                .fetchAs(Map.class)
+                .mappedBy((typeSystem, record) -> Map.of(
+                        "title", record.get("title").asString(),
+                        "text", record.get("text").asString(),
+                        "createdAt", record.get("createdAt").asString(),
+                        "type", record.get("type").asString()
+                ))
+                .one()
+                .orElseThrow(() -> new RuntimeException("Node not found for uuid: " + uuid));
+    }
+
 }
