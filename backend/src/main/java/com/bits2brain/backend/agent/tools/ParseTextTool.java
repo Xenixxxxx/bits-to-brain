@@ -31,36 +31,32 @@ public class ParseTextTool implements AgentTool {
 
     @Override
     public Object run(Map<String, Object> input) {
-//        String content = (String) input.get("content");
-//
-//        if (content == null || content.isBlank()) {
-//            return Map.of("error", "No content provided.");
-//        }
-//
-//        // Truncate to safe limit for token budget
-//        String truncatedText = TextTruncator.truncate(content);
-//
-//        String prompt = "You are a helpful assistant that extracts structured knowledge from text.\n" +
-//                "Given the following content, summarize the key points in a structured way:\n" + truncatedText;
+        String content = (String) input.get("content");
+
+        if (content == null || content.isBlank()) {
+            return Map.of("error", "No content provided.");
+        }
+
+        // Truncate to safe limit for token budget
+        String truncatedText = TextTruncator.truncate(content);
+
+        String prompt = "You are a helpful assistant that extracts structured knowledge from text.\n" +
+                "Given the following content, summarize the key points in a structured way:\n" + truncatedText;
 
         try {
-//            String result = chatModel.chat(prompt);
-//            Map<String, Object> parsed = Map.of(
-//                    "title", "Extracted Knowledge from Text",
-//                    "summary", result,
-//                    "type", "text"
-//            );
-
+            String result = chatModel.chat(prompt);
             Map<String, Object> parsed = Map.of(
-                    "title", "Extracted Extracted Knowledge from Text",
-                    "summary", "Sample Sample summary from text",
+                    "title", "Extracted Knowledge from Text",
+                    "summary", result,
                     "type", "text"
             );
+
             log.info("[parseTextTool] Parsed result: {}", parsed);
             knowledgeService.saveFromParsedResult(parsed);
             return parsed;
         } catch (Exception e) {
-            return Map.of("error", "Chat model processing failed", "details", e.getMessage());
+            log.error("[parseTextTool] Error processing chat model: {}", e.getMessage(), e);
+            return Map.of("error", "Chat model processing failed");
         }
     }
 }

@@ -26,7 +26,7 @@ public class AzureEmbeddingModel {
                 .endpoint(endpoint)
                 .apiKey(apiKey)
                 .deploymentName(deploymentId)
-                .dimensions(1053)
+                .dimensions(1536)
                 .logRequestsAndResponses(true)
                 .build();
     }
