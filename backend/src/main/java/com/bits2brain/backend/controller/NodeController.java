@@ -34,4 +34,19 @@ public class NodeController {
     public List<Map<String, Object>> recommend(@RequestParam String fromId) {
         return knowledgeService.recommendRelatedNodes(fromId);
     }
+
+    @PostMapping("/confirm")
+    public ResponseEntity<String> confirmAndSave(@RequestBody Map<String, String> request) {
+        String title = request.get("title");
+        String summary = request.get("summary");
+        String fromId = request.get("fromId");
+
+        if (title == null || summary == null || fromId == null ||
+                title.isEmpty() || summary.isEmpty() || fromId.isEmpty()) {
+            return ResponseEntity.badRequest().body("Missing required fields");
+        }
+
+        knowledgeService.confirmAndSave(title, summary, fromId);
+        return ResponseEntity.ok("Saved and linked");
+    }
 }

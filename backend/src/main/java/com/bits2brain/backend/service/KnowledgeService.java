@@ -50,7 +50,7 @@ public class KnowledgeService {
     }
 
 
-    public void saveFromParsedResult(Map<String, Object> parsed) {
+    public String saveFromParsedResult(Map<String, Object> parsed) {
         String title = (String) parsed.getOrDefault("title", "Untitled");
         String summary = (String) parsed.getOrDefault("summary", "");
         String type = (String) parsed.getOrDefault("type", "unknown");
@@ -76,7 +76,7 @@ public class KnowledgeService {
             log.info("[KnowledgeService] Found similar Score: {}, document: {}", r.score(), r.embedded().text());
             if (r.score() == 1) {
                 log.info("[KnowledgeService] Exact match found, not saving.");
-                return;
+                return "";
             }
         }
 
@@ -91,6 +91,7 @@ public class KnowledgeService {
             createRelationship(uuid, toId, score);
             log.info("[KnowledgeService] Created link from {} to {} with score {}", uuid, toId, score);
         }
+        return uuid;
     }
 
     public void createRelationship(String fromId, String toId, double score) {
@@ -161,4 +162,27 @@ public class KnowledgeService {
             return List.of(Map.of("raw", result));
         }
     }
+
+    public void confirmAndSave(String title, String summary, String fromId) {
+        String prompt = String.format("""
+        You are a knowledge assistant.
+        Given the following knowledge title and its short summary, write a detailed explanation (1-3 paragraphs).
+        
+        Title: %s
+        Summary: %s
+        """, title, summary);
+
+        String fullText = chatLanguageModel.chat(prompt);
+
+        Map<String, Object> parsedResult = Map.of(
+                "title", title,
+                "summary", fullText,
+                "type", "generated"
+        );
+
+        String newId = saveFromParsedResult(parsedResult);
+        createRelationship(fromId, newId, 0);
+        log.info("[KnowledgeService] Created relationship from {} to {}", fromId, newId);
+    }
+
 }
