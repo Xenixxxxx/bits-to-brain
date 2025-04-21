@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.bits2brain.backend.agent.models.AzureOpenAiChat;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,6 +94,12 @@ public class KnowledgeService {
     }
 
     public void createRelationship(String fromId, String toId, double score) {
+        if (fromId.compareTo(toId) > 0) {
+            String temp = fromId;
+            fromId = toId;
+            toId = temp;
+        }
+
         neo4jClient.query("""
                 MATCH (a {uuid: $fromId}), (b {uuid: $toId})
                 MERGE (a)-[r:SIMILAR]->(b)
