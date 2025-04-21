@@ -9,7 +9,7 @@ public class prompts {
             1. "title" — A concise title (ideally within 5 words), suitable as a node in a knowledge graph.
             2. "summary" — A structured summary written in **Markdown format**
             
-            Return the result strictly in JSON format like:
+            Return ONLY a valid **raw JSON** object. DO NOT include ```json or ``` or any explanation text. Format:
             {
               "title": "Concise and meaningful title",
               "summary": "A well-written summary with multiple paragraphs..."

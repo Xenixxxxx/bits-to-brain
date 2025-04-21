@@ -81,7 +81,7 @@ class ParseUrlTool implements AgentTool {
             knowledgeService.saveFromParsedResult(parsed);
             return parsed;
         } catch (Exception e) {
-            log.error("[parseUrlTool] Chat model processing failed: {}", e.getMessage());
+            log.error("[parseUrlTool] Chat model processing failed", e);
             return Map.of("error", "Chat model processing failed", "details", e.getMessage());
         }
     }

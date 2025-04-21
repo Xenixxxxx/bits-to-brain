@@ -43,7 +43,7 @@ public class AgentProvider {
         return AiServices.builder(AssistantAgent.class)
                 .chatLanguageModel(chatLanguageModel)
                 .systemMessageProvider((user) -> systemPrompt)
-                .chatMemory(MessageWindowChatMemory.withMaxMessages(10))
+                .chatMemory(MessageWindowChatMemory.withMaxMessages(5))
                 .tools(chatTools)
                 .build();
     }

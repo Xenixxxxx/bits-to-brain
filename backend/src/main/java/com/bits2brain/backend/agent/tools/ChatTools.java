@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -73,18 +74,20 @@ public class ChatTools {
     public Map<String, Object> queryNodeByUuid(@P("uuid") String uuid) {
         log.info("[QueryNodeByUuidTool] Querying node with UUID: {}", uuid);
         try {
-            log.info("[QueryNodeByUuidTool] Querying node with UUID: {}", uuid);
             Map<String, Object> node = knowledgeService.getNodeByUuid(uuid);
             if (node == null || node.isEmpty()) {
                 log.warn("[QueryNodeByUuidTool] Node not found for UUID: {}", uuid);
                 return Map.of("error", "Node not found for UUID: " + uuid);
             }
-            node.remove("createdAt");
-            node.remove("type");
-            log.info("[QueryNodeByUuidTool] Node found, title:{}", node.getOrDefault("title", "N/A"));
-            return node;
+
+            Map<String, Object> retNode = new HashMap<>(knowledgeService.getNodeByUuid(uuid));
+
+            retNode.remove("createdAt");
+            retNode.remove("type");
+            log.info("[QueryNodeByUuidTool] Node found, title:{}", retNode.getOrDefault("title", "N/A"));
+            return retNode;
         } catch (Exception e) {
-            log.warn("[QueryNodeByUuidTool] error for UUID: {}, {}", uuid, e.getMessage());
+            log.warn("[QueryNodeByUuidTool] error for UUID: {}", uuid, e);
             return Map.of("error", "Node not found for UUID: " + uuid);
         }
     }

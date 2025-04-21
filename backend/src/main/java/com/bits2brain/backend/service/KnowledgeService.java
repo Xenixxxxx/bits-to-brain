@@ -187,7 +187,7 @@ public class KnowledgeService {
                 - A concise and meaningful title (5 words max)
                 - A one or two sentence summary explaining the topic
                 
-                Return the results strictly in **JSON array format**, like:
+                Return ONLY a valid **raw JSON array** object. DO NOT include ```json or ``` or any explanation text. Format:
                 [
                   {"title": "Title A", "summary": "Summary of A..."},
                   {"title": "Title B", "summary": "Summary of B..."},
