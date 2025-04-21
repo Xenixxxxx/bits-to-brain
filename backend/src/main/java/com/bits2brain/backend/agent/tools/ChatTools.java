@@ -35,6 +35,7 @@ public class ChatTools {
 
     @Tool("Finds the most relevant knowledge node by semantic similarity to the input text")
     public Map<String, Object> findRelevantNode(@P("user input topic") String topic) {
+        log.info("[QueryVectorTool] Searching for relevant knowledge node for topic: {}", topic);
         try {
             Embedding queryEmbedding = embeddingModel.embed(topic).content();
 
@@ -53,6 +54,7 @@ public class ChatTools {
             TextSegment segment = match.embedded();
 
             Metadata metadata = segment.metadata();
+            log.info("[QueryVectorTool] Found relevant node title: {}", metadata.getString("title"));
 
             return Map.of(
                     "matched", true,
@@ -69,6 +71,7 @@ public class ChatTools {
 
     @Tool("Given a node uuid, returns its title, content(text)")
     public Map<String, Object> queryNodeByUuid(@P("uuid") String uuid) {
+        log.info("[QueryNodeByUuidTool] Querying node with UUID: {}", uuid);
         try {
             log.info("[QueryNodeByUuidTool] Querying node with UUID: {}", uuid);
             Map<String, Object> node = knowledgeService.getNodeByUuid(uuid);
@@ -78,6 +81,7 @@ public class ChatTools {
             }
             node.remove("createdAt");
             node.remove("type");
+            log.info("[QueryNodeByUuidTool] Node found, title:{}", node.getOrDefault("title", "N/A"));
             return node;
         } catch (Exception e) {
             log.warn("[QueryNodeByUuidTool] error for UUID: {}, {}", uuid, e.getMessage());
@@ -87,6 +91,7 @@ public class ChatTools {
 
     @Tool("Given a topic the user is interested in, recommends 3 related knowledge nodes with title and summary.")
     public List<Map<String, String>> recommendNodesTool(String topic) {
+        log.info("[RecommendNodesTool] Recommending nodes for topic: {}", topic);
         String prompt = String.format("""
             You are a smart assistant helping to expand a knowledge graph.
 
@@ -118,6 +123,7 @@ public class ChatTools {
 
     @Tool("Confirm and save a newly recommended node into the knowledge graph.")
     public Map<String, Object> confirmRecommendationTool(@P("title") String title, @P("summary") String summary) {
+        log.info("[ConfirmRecommendationTool] Confirming recommendation for title: {}", title);
         try {
             String prompt = String.format(RECOMMEND_CONFIRM, title, summary);
 
@@ -129,6 +135,7 @@ public class ChatTools {
                     "type", "generated"
             );
             knowledgeService.saveFromParsedResult(parsedResult);
+            log.info("[ConfirmRecommendationTool] Node saved successfully for title: {}", title);
             return Map.of("status", "success", "message", "Node saved successfully");
         } catch (Exception e) {
             log.error("[ConfirmRecommendationTool] Failed to save node", e);
