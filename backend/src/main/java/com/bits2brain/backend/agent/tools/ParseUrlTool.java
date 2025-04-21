@@ -1,7 +1,8 @@
 package com.bits2brain.backend.agent.tools;
 
-import com.bits2brain.backend.agent.models.AzureOpenAiChat;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.bits2brain.backend.util.TextTruncator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -55,9 +56,13 @@ class ParseUrlTool implements AgentTool {
         logger.info("[parseUrlTool] Webpage fetched successfully in {} ms", Duration.between(t1, t2).toMillis());
 
         String truncatedText = TextTruncator.truncate(pageText);
-        String prompt = "You are a helpful assistant that extracts structured knowledge from webpage text.\n"
-                + "Summarize the following page content in a structured and concise way:\n"
-                + truncatedText;
+        String prompt = "You are a helpful assistant that extracts structured knowledge from webpage text.\n" +
+                "Given the content below, extract:\n" +
+                "- A clear and concise title (preferably within 5 words)\n" +
+                "- A short summary of the content\n\n" +
+                "Return the result strictly in JSON format like:\n" +
+                "{ \"title\": \"...\", \"summary\": \"...\" }\n\n" +
+                "Content:\n" + truncatedText;
 
         Instant t3 = Instant.now();
         try {
@@ -66,18 +71,19 @@ class ParseUrlTool implements AgentTool {
 
             logger.info("[parseUrlTool] LLM response completed in {} ms", Duration.between(t3, t4).toMillis());
 
-            return Map.of(
-                    "title", "Extracted Knowledge from Web Page",
-                    "summary", result,
-                    "source", "parseUrlTool",
-                    "timing", Map.of(
-                            "fetchTimeMs", Duration.between(t1, t2).toMillis(),
-                            "llmTimeMs", Duration.between(t3, t4).toMillis()
-                    )
-            );
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> parsed = mapper.readValue(result, new TypeReference<>() {});
+            parsed.put("source", "parseUrlTool");
+            parsed.put("timing", Map.of(
+                    "fetchTimeMs", Duration.between(t1, t2).toMillis(),
+                    "llmTimeMs", Duration.between(t3, t4).toMillis()
+            ));
+
+            return parsed;
         } catch (Exception e) {
             logger.error("[parseUrlTool] Chat model processing failed: {}", e.getMessage());
             return Map.of("error", "Chat model processing failed", "details", e.getMessage());
         }
     }
+
 }

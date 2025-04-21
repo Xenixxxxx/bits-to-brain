@@ -1,11 +1,13 @@
 package com.bits2brain.backend.util;
 
+import static com.bits2brain.backend.util.Const.MAX_CHAR_LENGTH;
+
 /**
  * Utility for truncating long text input to stay within token-safe character limits.
  */
 public class TextTruncator {
 
-    public static final int MAX_CHAR_LENGTH = 2500;
+
 
     /**
      * Truncates text to the safe length for token-bound LLM prompts.

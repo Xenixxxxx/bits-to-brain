@@ -1,12 +1,13 @@
 package com.bits2brain.backend.agent.tools;
 
-import com.bits2brain.backend.agent.models.AzureOpenAiChat;
 import com.bits2brain.backend.service.KnowledgeService;
 import com.bits2brain.backend.util.TextTruncator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 
 import java.util.Map;
@@ -41,15 +42,20 @@ public class ParseTextTool implements AgentTool {
         String truncatedText = TextTruncator.truncate(content);
 
         String prompt = "You are a helpful assistant that extracts structured knowledge from text.\n" +
-                "Given the following content, summarize the key points in a structured way:\n" + truncatedText;
+                "Given the content below, extract:\n" +
+                "- A concise title (preferably within 5 words)\n" +
+                "- A brief summary of the key ideas\n\n" +
+                "Return the result strictly in JSON format like:\n" +
+                "{ \"title\": \"...\", \"summary\": \"...\" }\n\n" +
+                "Content:\n" + truncatedText;
 
         try {
             String result = chatModel.chat(prompt);
-            Map<String, Object> parsed = Map.of(
-                    "title", "Extracted Knowledge from Text",
-                    "summary", result,
-                    "type", "text"
-            );
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> parsed = mapper.readValue(result, new TypeReference<>() {
+            });
+
+            parsed.put("type", "text"); // add type metadata
 
             log.info("[parseTextTool] Parsed result: {}", parsed);
             knowledgeService.saveFromParsedResult(parsed);
