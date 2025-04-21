@@ -1,35 +1,32 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { Flow } from './components/Flow/Flow';
+import { ChatDialog } from './components/ChatDialog';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div style={{ 
+      display: 'flex', 
+      width: '100vw', 
+      height: '100vh',
+      overflow: 'hidden'
+    }}>
+      <div style={{ 
+        width: '70%', 
+        height: '100%',
+        position: 'relative'
+      }}>
+        <Flow />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+      <div style={{ 
+        width: '30%', 
+        height: '100%',
+        borderLeft: '1px solid #e5e7eb',
+        backgroundColor: '#f9fafb'
+      }}>
+        <ChatDialog />
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
