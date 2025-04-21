@@ -97,7 +97,8 @@ public class KnowledgeService {
     public void createRelationship(String fromId, String toId, double score) {
         neo4jClient.query("""
                 MATCH (a {uuid: $fromId}), (b {uuid: $toId})
-                MERGE (a)-[r:SIMILAR {score: $score}]->(b)
+                MERGE (a)-[r:SIMILAR]->(b)
+                ON CREATE SET r.score = $score
                 """).bindAll(Map.of("fromId", fromId, "toId", toId, "score", score)).run();
     }
 
@@ -113,7 +114,8 @@ public class KnowledgeService {
                         "title", record.get("title").asString(),
                         "text", record.get("text").asString(),
                         "createdAt", record.get("createdAt").asString(),
-                        "type", record.get("type").asString()
+                        "type", record.get("type").asString(),
+                        "uuid", uuid
                 ))
                 .one()
                 .orElseThrow(() -> new RuntimeException("Node not found for uuid: " + uuid));

@@ -21,8 +21,8 @@ public class AgentProvider {
     - Call queryNodeByUuidTool to retrieve node content.
     - Answer based on it.
     
-    If the user wants to learn a new topic (no uuid):
-    1. Call queryNodeByTitleTool to find similar node.
+    If the user wants to learn a new topic (without uuid):
+    1. Call findRelevantNode to find similar node.
     2. If found, return its content for review.
     3. If not found, call recommendNodesTool to suggest 3 related nodes.
     4. When user confirms one, call confirmRecommendationTool to store it.

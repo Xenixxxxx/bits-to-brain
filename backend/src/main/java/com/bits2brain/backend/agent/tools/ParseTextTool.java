@@ -4,6 +4,7 @@ import com.bits2brain.backend.service.KnowledgeService;
 import com.bits2brain.backend.util.TextTruncator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,16 +15,12 @@ import java.util.Map;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ParseTextTool implements AgentTool {
 
     private final ChatLanguageModel chatModel;
     private final KnowledgeService knowledgeService;
 
-    @Autowired
-    public ParseTextTool(ChatLanguageModel chatModelProvider, KnowledgeService knowledgeService) {
-        this.chatModel = chatModelProvider;
-        this.knowledgeService = knowledgeService;
-    }
 
     @Override
     public String getName() {

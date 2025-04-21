@@ -16,9 +16,14 @@ public class ChatController {
     @PostMapping
     public Map<String, String> chat(@RequestBody Map<String, String> request) {
         String userMessage = request.get("message");
+        String uuid = request.get("uuid");
 
         if (userMessage == null || userMessage.trim().isEmpty()) {
             return Map.of("error", "Message is required");
+        }
+
+        if (uuid != null && !uuid.isBlank()) {
+            userMessage = "[uuid: " + uuid + "] " + userMessage;
         }
 
         String response = assistantAgent.chat(userMessage);
