@@ -32,7 +32,7 @@ public class NodeController {
 
     @GetMapping("/recommend")
     public List<Map<String, Object>> recommend(@RequestParam String fromId) {
-        return knowledgeService.recommendRelatedNodes(fromId);
+        return knowledgeService.recommendByUuid(fromId);
     }
 
     @PostMapping("/confirm")

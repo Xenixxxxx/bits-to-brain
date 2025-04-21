@@ -2,17 +2,17 @@ package com.bits2brain.backend.agent.models;
 
 import dev.langchain4j.model.azure.AzureOpenAiChatModel;
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Provides access to Azure-hosted ChatLanguageModel (e.g., GPT-4).
- * This class is a managed Spring Bean and should be injected wherever needed.
+ * This class is a managed Spring Configuration and provides a ChatLanguageModel Bean.
  */
-@Component
+@Configuration
 public class AzureOpenAiChat {
 
     private static final Logger logger = LoggerFactory.getLogger(AzureOpenAiChat.class);
@@ -29,14 +29,12 @@ public class AzureOpenAiChat {
     @Value("${azure.openai.api-version}")
     private String apiVersion; // unused but required for future versions or custom clients
 
-    private ChatLanguageModel chatModel;
-
-    @PostConstruct
-    private void initialize() {
+    @Bean
+    public ChatLanguageModel chatLanguageModel() {
         try {
             logger.info("Initializing Azure OpenAI Chat Model...");
 
-            this.chatModel = AzureOpenAiChatModel.builder()
+            ChatLanguageModel chatModel = AzureOpenAiChatModel.builder()
                     .endpoint(endpoint)
                     .apiKey(apiKey)
                     .deploymentName(deploymentId)
@@ -45,13 +43,10 @@ public class AzureOpenAiChat {
                     .build();
 
             logger.info("Azure OpenAI Chat Model initialized successfully");
+            return chatModel;
         } catch (Exception e) {
             logger.error("Failed to initialize Azure OpenAI Chat Model: {}", e.getMessage(), e);
             throw new RuntimeException("Azure Chat Model initialization failed", e);
         }
-    }
-
-    public ChatLanguageModel get() {
-        return chatModel;
     }
 }

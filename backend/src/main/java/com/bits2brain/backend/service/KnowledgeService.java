@@ -36,11 +36,11 @@ public class KnowledgeService {
 
     @Autowired
     public KnowledgeService(EmbeddingModel embeddingModel, EmbeddingStore<TextSegment> vectorStore,
-                            Neo4jClient neo4jClient, AzureOpenAiChat chatModelProvider) {
+                            Neo4jClient neo4jClient, ChatLanguageModel chatModelProvider) {
         this.embeddingStore = vectorStore;
         this.embeddingModel = embeddingModel;
         this.neo4jClient = neo4jClient;
-        this.chatLanguageModel = chatModelProvider.get();
+        this.chatLanguageModel = chatModelProvider;
     }
 
     @PostConstruct
@@ -104,9 +104,9 @@ public class KnowledgeService {
     @SuppressWarnings("unchecked")
     public Map<String, Object> getNodeByUuid(String uuid) {
         return (Map<String, Object>) neo4jClient.query("""
-            MATCH (n {uuid: $uuid})
-            RETURN n.title AS title, n.text AS text, n.createdAt AS createdAt, n.type AS type
-        """)
+                            MATCH (n {uuid: $uuid})
+                            RETURN n.title AS title, n.text AS text, n.createdAt AS createdAt, n.type AS type
+                        """)
                 .bind(uuid).to("uuid")
                 .fetchAs(Map.class)
                 .mappedBy((typeSystem, record) -> Map.of(
@@ -119,58 +119,106 @@ public class KnowledgeService {
                 .orElseThrow(() -> new RuntimeException("Node not found for uuid: " + uuid));
     }
 
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getNodeByTitle(String title) {
+        return (Map<String, Object>) neo4jClient.query("""
+                            MATCH (n {title: $title})
+                            RETURN n.title AS title, n.text AS text, n.createdAt AS createdAt, n.type AS type
+                            LIMIT 1
+                        """)
+                .bind(title).to("title")
+                .fetchAs(Map.class)
+                .mappedBy((typeSystem, record) -> Map.of(
+                        "title", record.get("title").asString(),
+                        "text", record.get("text").asString(),
+                        "createdAt", record.get("createdAt").asString(),
+                        "type", record.get("type").asString()
+                ))
+                .one()
+                .orElseThrow(() -> new RuntimeException("Node not found for title: " + title));
+    }
 
-    public List<Map<String, Object>> recommendRelatedNodes(String fromId) {
+
+    public List<Map<String, Object>> recommendByUuid(String fromId) {
         Map<String, Object> node = getNodeByUuid(fromId);
+        return recommendFromNode(node, fromId);
+    }
+
+    public List<Map<String, Object>> recommendByTitle(String title) {
+        Map<String, Object> node = getNodeByTitle(title);
+        if (node == null) {
+            log.error("[KnowledgeService] No node found for title: {}", title);
+            return List.of();
+        }
+        String uuid = (String) node.get("uuid");
+        if (uuid == null || uuid.isEmpty()) {
+            log.error("[KnowledgeService] No UUID found for title: {}", title);
+            return List.of();
+        }
+        return recommendFromNode(node, (String) node.get("uuid"));
+    }
+
+    private List<Map<String, Object>> recommendFromNode(Map<String, Object> node, String fromId) {
         String title = (String) node.get("title");
         String summary = (String) node.get("text");
 
         if (summary == null || summary.isEmpty()) {
-            log.error("[KnowledgeService] No summary found for node with ID: {}", fromId);
+            log.error("[KnowledgeService] No summary found for title: {}", title);
             return List.of();
         }
 
         String prompt = String.format("""
-    You are a smart knowledge assistant helping to expand a knowledge graph.
-
-    Given the following node:
-    Title: "%s"
-    Content: "%s"
-
-    Please recommend 3 new, distinct knowledge nodes that are related to the original content.
-    For each recommended node, include:
-    - A concise and meaningful title
-    - A one or two sentence summary explaining the topic
-
-    Return the results strictly in **JSON array format**, like:
-    [
-      {"title": "Title A", "summary": "Summary of A..."},
-      {"title": "Title B", "summary": "Summary of B..."},
-      {"title": "Title C", "summary": "Summary of C..."}
-    ]
-    """, title, summary);
+                You are a smart knowledge assistant helping to expand a knowledge graph.
+                
+                Given the following node:
+                Title: "%s"
+                Content: "%s"
+                
+                Please recommend 3 new, distinct knowledge nodes that are related to the original content.
+                For each recommended node, include:
+                - A concise and meaningful title
+                - A one or two sentence summary explaining the topic
+                
+                Return the results strictly in **JSON array format**, like:
+                [
+                  {"title": "Title A", "summary": "Summary of A..."},
+                  {"title": "Title B", "summary": "Summary of B..."},
+                  {"title": "Title C", "summary": "Summary of C..."}
+                ]
+                """, title, summary);
 
         String result = chatLanguageModel.chat(prompt);
         log.info("[KnowledgeService] Recommendation result for '{}':\n{}", title, result);
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(result, new TypeReference<>() {}
-            );
+            List<Map<String, String>> parsed = objectMapper.readValue(result, new TypeReference<>() {
+            });
+            return parsed.stream()
+                    .map(entry -> Map.<String, Object>of(
+                            "fromId", fromId,
+                            "title", entry.get("title"),
+                            "summary", entry.get("summary")
+                    ))
+                    .toList();
         } catch (Exception e) {
             log.warn("[KnowledgeService] Failed to parse recommendation result, returning raw result", e);
-            return List.of(Map.of("raw", result));
+            return List.of(Map.of(
+                    "fromId", fromId,
+                    "raw", result
+            ));
         }
     }
 
+
     public void confirmAndSave(String title, String summary, String fromId) {
         String prompt = String.format("""
-        You are a knowledge assistant.
-        Given the following knowledge title and its short summary, write a detailed explanation (1-3 paragraphs).
-        
-        Title: %s
-        Summary: %s
-        """, title, summary);
+                You are a knowledge assistant.
+                Given the following knowledge title and its short summary, write a detailed explanation (1-3 paragraphs).
+                
+                Title: %s
+                Summary: %s
+                """, title, summary);
 
         String fullText = chatLanguageModel.chat(prompt);
 

@@ -1,7 +1,7 @@
 package com.bits2brain.backend.controller;
 
-import com.bits2brain.backend.agent.AgentManager;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.bits2brain.backend.agent.ToolManager;
+import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,9 +13,9 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/agent")
-public class MultiModalUploadController {
-    @Autowired
-    private AgentManager agentManager;
+public class UploadController {
+    @Resource
+    private ToolManager toolManager;
 
     /**
      * Unified endpoint for uploading multimodal content (text, URL, image, video, PDF, etc.)
@@ -74,7 +74,7 @@ public class MultiModalUploadController {
         inputMap.put("prompt", autoPrompt);
         inputMap.put("content", inputContent);
 
-        Object result = agentManager.call(toolName, inputMap);
+        Object result = toolManager.call(toolName, inputMap);
         return ResponseEntity.ok(result);
     }
 }

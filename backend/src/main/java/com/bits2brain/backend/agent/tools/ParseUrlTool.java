@@ -22,8 +22,8 @@ class ParseUrlTool implements AgentTool {
     private final ChatLanguageModel chatModel;
 
     @Autowired
-    public ParseUrlTool(AzureOpenAiChat chatModelProvider) {
-        this.chatModel = chatModelProvider.get();
+    public ParseUrlTool(ChatLanguageModel chatModelProvider) {
+        this.chatModel = chatModelProvider;
     }
 
     @Override

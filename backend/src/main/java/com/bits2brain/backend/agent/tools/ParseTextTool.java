@@ -19,8 +19,8 @@ public class ParseTextTool implements AgentTool {
     private final KnowledgeService knowledgeService;
 
     @Autowired
-    public ParseTextTool(AzureOpenAiChat chatModelProvider, KnowledgeService knowledgeService) {
-        this.chatModel = chatModelProvider.get();
+    public ParseTextTool(ChatLanguageModel chatModelProvider, KnowledgeService knowledgeService) {
+        this.chatModel = chatModelProvider;
         this.knowledgeService = knowledgeService;
     }
 

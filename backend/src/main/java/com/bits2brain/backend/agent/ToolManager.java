@@ -12,12 +12,12 @@ import java.util.Map;
  * Tools are identified by a unique name and implement the AgentTool interface.
  */
 @Component
-public class AgentManager {
+public class ToolManager {
 
     private final List<AgentTool> tools;
 
     @Autowired
-    public AgentManager(List<AgentTool> tools) {
+    public ToolManager(List<AgentTool> tools) {
         this.tools = tools;
     }
 
@@ -25,7 +25,7 @@ public class AgentManager {
      * Call a tool by its name with given input.
      *
      * @param toolName the name of the tool to invoke
-     * @param input input parameters (prompt, content, type, etc.)
+     * @param input input content
      * @return the result of tool execution
      */
     public Object call(String toolName, Map<String, Object> input) {
