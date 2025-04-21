@@ -5,12 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.bits2brain.backend.util.TextTruncator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +15,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+
+import static com.bits2brain.backend.util.prompts.TEXT_EXTRACT;
 
 @Slf4j
 @Component
@@ -61,13 +60,7 @@ class ParseUrlTool implements AgentTool {
         log.info("[parseUrlTool] Webpage fetched successfully in {} ms", Duration.between(t1, t2).toMillis());
 
         String truncatedText = TextTruncator.truncate(pageText);
-        String prompt = "You are a helpful assistant that extracts structured knowledge from webpage text.\n" +
-                "Given the content below, extract:\n" +
-                "- A clear and concise title (preferably within 5 words)\n" +
-                "- A short summary of the content\n\n" +
-                "Return the result strictly in JSON format like:\n" +
-                "{ \"title\": \"...\", \"summary\": \"...\" }\n\n" +
-                "Content:\n" + truncatedText;
+        String prompt = TEXT_EXTRACT + truncatedText;
 
         Instant t3 = Instant.now();
         try {

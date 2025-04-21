@@ -6,12 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 
 import java.util.Map;
+
+import static com.bits2brain.backend.util.prompts.TEXT_EXTRACT;
 
 @Slf4j
 @Component
@@ -38,13 +39,7 @@ public class ParseTextTool implements AgentTool {
         // Truncate to safe limit for token budget
         String truncatedText = TextTruncator.truncate(content);
 
-        String prompt = "You are a helpful assistant that extracts structured knowledge from text.\n" +
-                "Given the content below, extract:\n" +
-                "- A concise title (preferably within 5 words)\n" +
-                "- A brief summary of the key ideas\n\n" +
-                "Return the result strictly in JSON format like:\n" +
-                "{ \"title\": \"...\", \"summary\": \"...\" }\n\n" +
-                "Content:\n" + truncatedText;
+        String prompt = TEXT_EXTRACT + truncatedText;
 
         try {
             String result = chatModel.chat(prompt);

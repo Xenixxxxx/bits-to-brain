@@ -24,6 +24,7 @@ import dev.langchain4j.data.document.Metadata;
 
 
 import static com.bits2brain.backend.util.Const.SIMILARITY_THRESHOLD;
+import static com.bits2brain.backend.util.prompts.RECOMMEND_CONFIRM;
 
 @Slf4j
 @Service
@@ -183,7 +184,7 @@ public class KnowledgeService {
                 
                 Please recommend 3 new, distinct knowledge nodes that are related to the original content.
                 For each recommended node, include:
-                - A concise and meaningful title
+                - A concise and meaningful title (5 words max)
                 - A one or two sentence summary explaining the topic
                 
                 Return the results strictly in **JSON array format**, like:
@@ -219,13 +220,7 @@ public class KnowledgeService {
 
 
     public void confirmAndSave(String title, String summary, String fromId) {
-        String prompt = String.format("""
-                You are a knowledge assistant.
-                Given the following knowledge title and its short summary, write a detailed explanation (1-3 paragraphs).
-                
-                Title: %s
-                Summary: %s
-                """, title, summary);
+        String prompt = String.format(RECOMMEND_CONFIRM, title, summary);
 
         String fullText = chatLanguageModel.chat(prompt);
 

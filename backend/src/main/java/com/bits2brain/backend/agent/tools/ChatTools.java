@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.bits2brain.backend.util.prompts.RECOMMEND_CONFIRM;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -117,13 +119,7 @@ public class ChatTools {
     @Tool("Confirm and save a newly recommended node into the knowledge graph.")
     public Map<String, Object> confirmRecommendationTool(@P("title") String title, @P("summary") String summary) {
         try {
-            String prompt = String.format("""
-                You are a knowledge assistant.
-                Given the following knowledge title and its short summary, write a detailed explanation (1-3 paragraphs).
-                
-                Title: %s
-                Summary: %s
-                """, title, summary);
+            String prompt = String.format(RECOMMEND_CONFIRM, title, summary);
 
             String fullText = chatModel.chat(prompt);
 
