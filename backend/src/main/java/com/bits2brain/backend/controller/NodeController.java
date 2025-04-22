@@ -42,8 +42,8 @@ public class NodeController {
         String fromId = request.get("fromId");
         String uuid = request.get("uuid");
 
-        if (title == null || summary == null || fromId == null ||
-                title.isEmpty() || summary.isEmpty() || fromId.isEmpty()) {
+        if (title == null || summary == null || fromId == null || uuid == null ||
+                title.isBlank() || summary.isBlank() || fromId.isBlank() || uuid.isBlank()) {
             return ResponseEntity.badRequest().body("Missing required fields");
         }
 
