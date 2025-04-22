@@ -39,6 +39,8 @@
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
     "reactflow": "^11.11.4",
-    "uuid": "^11.1.0"
+    "three": "^0.175.0",
+    "uuid": "^11.1.0",
+    "vanta": "^0.5.24"
   }
 }

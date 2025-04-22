@@ -27,7 +27,8 @@ export const Logo = () => {
         <span style={{
           fontSize: '1.25rem',
           fontWeight: '600',
-          color: 'rgb(248,234,212)'
+          color: 'rgb(248,234,212)',
+          fontFamily: 'Inter, sans-serif'
         }}>
           Bits to Brain
         </span>

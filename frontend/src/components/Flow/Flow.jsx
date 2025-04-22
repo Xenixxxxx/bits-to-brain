@@ -16,6 +16,7 @@ import { MarkdownNode } from '../MarkdownNode';
 import { NodeDetails } from './NodeDetails';
 import { UploadBox } from './UploadBox';
 import { useNodeManagement } from '../../hooks/useNodeManagement';
+import { VantaBackground } from './VantaBackground';
 
 const nodeTypes = {
   markdown: MarkdownNode,
@@ -51,12 +52,12 @@ const getForceLayoutedElements = (nodes, edges) => {
       .strength(0.5)  // 边的强度
     )
     .force('charge', forceManyBody()
-      .strength(-1000)  // 节点间的排斥力
+      .strength(-500)  // 节点间的排斥力
     )
     .force('center', forceCenter(0, 0))  // 中心力
     .force('collision', forceCollide()
       .radius(100)  // 节点碰撞半径
-      .strength(0.7)  // 碰撞强度
+      .strength(1)  // 碰撞强度
     );
 
   // 运行模拟
@@ -114,7 +115,8 @@ const FlowInner = () => {
           data: {
             label: node.title,
             content: node.title,
-            isRecommendation: false
+            isRecommendation: false,
+            size: Math.random() * 80 + 40  // 随机生成 80-120 之间的大小
           }
         }));
 
@@ -127,8 +129,9 @@ const FlowInner = () => {
           type: 'straight',
           animated: false,
           style: { 
-            stroke: 'rgb(0, 0, 0)',
-            strokeWidth: 2
+            stroke: 'rgb(132, 132, 140)',
+            strokeWidth: 2,
+            zIndex: 1
           }
         }));
 
@@ -355,6 +358,7 @@ const FlowInner = () => {
         `}
       </style>
 
+        {/* Background rgb */}
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -371,13 +375,14 @@ const FlowInner = () => {
         onInit={(instance) => {
           reactFlowInstance.setViewport({ x: 0, y: 0, zoom: 1 });
         }}
-        style={{ backgroundColor: 'rgb(255, 255, 255)' }}
+        style={{ backgroundColor: 'transparent' }}
         defaultEdgeOptions={{
           type: 'straight',
           animated: false,
           style: { 
-            stroke: 'rgb(0, 0, 0)',
-            strokeWidth: 2
+            stroke: 'rgb(132, 132, 140)',
+            strokeWidth: 2,
+            zIndex: 1
           }
         }}
         edgesFocusable={false}
@@ -387,7 +392,7 @@ const FlowInner = () => {
         maxZoom={4}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
       >
-        <Background color="rgb(248,234,212)" gap={16} size={1} />
+        <VantaBackground />
         {/* <Controls /> */}
         {/* <MiniMap /> */}
         {selectedNode && (

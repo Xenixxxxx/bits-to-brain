@@ -107,7 +107,7 @@ export const ChatDialog = () => {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      backgroundColor: '#ffffff'
+      backgroundColor: '#2c42bf'
     }}>
       {/* Messages Container */}
       <div style={{

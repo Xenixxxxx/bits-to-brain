@@ -24,6 +24,7 @@
 
 .react-flow__node {
   @apply bg-white border-4 border-blue-200 rounded-xl p-5 min-w-[250px] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1;
+  z-index: 2;
 }
 
 .react-flow__node:hover {
@@ -31,17 +32,32 @@
 }
 
 .react-flow__handle {
-  @apply bg-blue-500 w-4 h-4 border-2 border-white;
+  @apply bg-transparent w-0 h-0 border-0;
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .react-flow__edge {
   @apply stroke-blue-400;
   stroke-width: 3;
+  z-index: 1;
 }
 
 .react-flow__edge-path {
   @apply stroke-blue-400;
   stroke-width: 3;
+  z-index: 1;
+}
+
+.react-flow__edge-text {
+  @apply fill-blue-400;
+  font-size: 12px;
+}
+
+.react-flow__edge-textbg {
+  @apply fill-white;
+  font-size: 12px;
 }
 
 .react-flow__controls {
