@@ -1,14 +1,16 @@
 package com.bits2brain.backend.agent;
 
 import com.bits2brain.backend.agent.tools.ChatTools;
+import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.MemoryId;
+import dev.langchain4j.service.UserMessage;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 
 @Configuration
 @RequiredArgsConstructor
@@ -31,21 +33,29 @@ public class AgentProvider {
     """;
 
     private final ChatLanguageModel chatLanguageModel;
+
     @Resource
     private final ChatTools chatTools;
 
     public interface AssistantAgent {
-        String chat(String userMessage);
+        String chat(@MemoryId String sessionId, @UserMessage String message);
     }
 
     @Bean
     public AssistantAgent assistantAgent() {
+
+
+        ChatMemoryProvider chatMemoryProvider = sessionId ->
+                MessageWindowChatMemory.builder()
+                        .id(sessionId)
+                        .maxMessages(5)
+                        .build();
+
         return AiServices.builder(AssistantAgent.class)
                 .chatLanguageModel(chatLanguageModel)
-                .systemMessageProvider((user) -> systemPrompt)
-                .chatMemory(MessageWindowChatMemory.withMaxMessages(5))
+                .chatMemoryProvider(chatMemoryProvider)
+                .systemMessageProvider(user -> systemPrompt)
                 .tools(chatTools)
                 .build();
     }
-
 }

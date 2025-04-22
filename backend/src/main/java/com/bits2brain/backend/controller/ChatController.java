@@ -17,16 +17,21 @@ public class ChatController {
     public Map<String, String> chat(@RequestBody Map<String, String> request) {
         String userMessage = request.get("message");
         String uuid = request.get("uuid");
+        String sessionId = request.get("sessionId");
 
-        if (userMessage == null || userMessage.trim().isEmpty()) {
+        if (userMessage == null || userMessage.trim().isBlank()) {
             return Map.of("error", "Message is required");
+        }
+
+        if (sessionId == null || sessionId.isBlank()) {
+            return Map.of("error", "Session ID is required");
         }
 
         if (uuid != null && !uuid.isBlank()) {
             userMessage = "[uuid: " + uuid + "] " + userMessage;
         }
 
-        String response = assistantAgent.chat(userMessage);
+        String response = assistantAgent.chat(sessionId, userMessage);
         return Map.of("response", response);
     }
 }

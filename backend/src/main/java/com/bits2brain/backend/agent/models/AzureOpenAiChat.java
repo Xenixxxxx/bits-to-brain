@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static com.bits2brain.backend.util.Const.MAX_TOKENS;
+
 /**
  * Provides access to Azure-hosted ChatLanguageModel (e.g., GPT-4).
  * This class is a managed Spring Configuration and provides a ChatLanguageModel Bean.
@@ -41,7 +43,7 @@ public class AzureOpenAiChat {
                     openAIClient(openAIClient).
                     deploymentName(deploymentId).
                     temperature(0.1).
-                    maxTokens(300).
+                    maxTokens(MAX_TOKENS).
                     build();
 
             logger.info("Azure OpenAI Chat Model initialized successfully");

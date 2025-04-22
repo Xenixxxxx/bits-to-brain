@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.bits2brain.backend.util.Const.QUERY_SIMILARITY_THRESHOLD;
 import static com.bits2brain.backend.util.prompts.RECOMMEND_CONFIRM;
 
 @Slf4j
@@ -42,7 +43,7 @@ public class ChatTools {
 
             EmbeddingSearchRequest searchRequest = EmbeddingSearchRequest.builder()
                     .queryEmbedding(queryEmbedding)
-                    .minScore(0.9)
+                    .minScore(QUERY_SIMILARITY_THRESHOLD)
                     .maxResults(1)
                     .build();
 

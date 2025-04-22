@@ -23,7 +23,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.data.document.Metadata;
 
 
-import static com.bits2brain.backend.util.Const.SIMILARITY_THRESHOLD;
+import static com.bits2brain.backend.util.Const.LINK_SIMILARITY_THRESHOLD;
 import static com.bits2brain.backend.util.prompts.RECOMMEND_CONFIRM;
 
 @Slf4j
@@ -68,7 +68,7 @@ public class KnowledgeService {
         log.info("[KnowledgeService] Saving text segment: {}, Metadata: {}", textSegment, metadata);
         Embedding embedding = embeddingModel.embed(textSegment).content();
 
-        EmbeddingSearchRequest embeddingSearchRequest = EmbeddingSearchRequest.builder().queryEmbedding(embedding).minScore(SIMILARITY_THRESHOLD).maxResults(3).build();
+        EmbeddingSearchRequest embeddingSearchRequest = EmbeddingSearchRequest.builder().queryEmbedding(embedding).minScore(LINK_SIMILARITY_THRESHOLD).maxResults(3).build();
 
         // similarity search
         List<EmbeddingMatch<TextSegment>> relevant = embeddingStore.search(embeddingSearchRequest).matches();
