@@ -106,7 +106,7 @@ public class ChatTools {
             - A concise title (5 words max)
             - A short summary (1-2 sentences)
 
-            Return the result strictly in JSON array format like:
+            Return ONLY a valid **raw JSON array** object. DO NOT include ```json or ``` or any explanation text. Format:
             [
               {"title": "Node Title A", "summary": "A short summary of A..."},
               {"title": "Node Title B", "summary": "A short summary of B..."},
