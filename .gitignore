@@ -48,3 +48,4 @@ desktop.ini
 docker-compose.override.yml
 
 neo4j/
+*.vtt

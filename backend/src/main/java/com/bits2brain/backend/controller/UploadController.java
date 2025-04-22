@@ -11,8 +11,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.bits2brain.backend.util.Const.TEXT_PARSER_NAME;
-import static com.bits2brain.backend.util.Const.URL_PARSER_NAME;
+import static com.bits2brain.backend.util.Const.*;
 
 /**
  * Controller for handling file uploads and text input.
@@ -50,7 +49,7 @@ public class UploadController {
             } else if (contentType.startsWith("video/")) {
                 inputContent = "[Video uploaded; processing module required to extract frames/audio.]";
                 autoPrompt = "This is a video uploaded by the user. Please summarize its main concepts for the knowledge graph.";
-                parserName = "parseVideoTool";
+                parserName = VIDEO_PARSER_NAME;
 
             } else if (contentType.equals("text/plain") || contentType.equals("application/pdf")) {
                 inputContent = new String(file.getBytes());
@@ -61,13 +60,19 @@ public class UploadController {
             }
         } else if (text != null && !text.isEmpty()) {
             if (text.startsWith("http://") || text.startsWith("https://")) {
-                inputContent = text;
-                autoPrompt = "Please extract key knowledge points from the following webpage:";
-                parserName = URL_PARSER_NAME;
+                if (text.contains("tiktok.com") || text.contains("youtube.com")) {
+                    parserName = YOUTUBE_PARSER_NAME;
+                    inputContent = text;
+                    autoPrompt = "Please extract knowledge from the following short video link:";
+                } else {
+                    parserName = URL_PARSER_NAME;
+                    inputContent = text;
+                    autoPrompt = "Please extract key knowledge points from the following webpage:";
+                }
             } else {
+                parserName = TEXT_PARSER_NAME;
                 inputContent = text;
                 autoPrompt = "Please transform the following content into a structured knowledge node:";
-                parserName = TEXT_PARSER_NAME;
             }
         } else {
             return ResponseEntity.badRequest().body("No valid input provided.");

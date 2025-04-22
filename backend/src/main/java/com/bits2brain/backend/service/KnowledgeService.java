@@ -82,6 +82,7 @@ public class KnowledgeService {
 
         // save node
         this.embeddingStore.add(embedding, textSegment);
+        log.info("[KnowledgeService] Node saved with UUID: {}", uuid);
 
         // save links based on UUID
         for (EmbeddingMatch<TextSegment> r : relevant) {
@@ -91,6 +92,7 @@ public class KnowledgeService {
             createRelationship(uuid, toId, score);
             log.info("[KnowledgeService] Created link from {} to {} with score {}", uuid, toId, score);
         }
+        log.info("[KnowledgeService] Links created.");
         return uuid;
     }
 
