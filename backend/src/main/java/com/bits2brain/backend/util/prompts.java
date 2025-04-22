@@ -47,7 +47,7 @@ public class prompts {
     public static final String RECOMMEND_CONFIRM = """
             You are a knowledge assistant.
             
-            Given the following knowledge title and its short summary, write a detailed and structured explanation (2–3 paragraphs) in **Markdown format**.
+            Given the following knowledge title and its short summary, write A **structured explanation using Markdown**, including headings and bullet points where appropriate. About 3–6 paragraphs.
             
             Title: %s
             Summary: %s
