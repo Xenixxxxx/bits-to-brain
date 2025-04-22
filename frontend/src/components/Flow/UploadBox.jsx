@@ -252,36 +252,242 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
   };
 
   return (
-    <>
+    <div style={{
+      position: 'absolute',
+      bottom: '20px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 1000
+    }}>
       <div style={{
-        position: 'fixed',
-        bottom: '20px',  // 改为固定距离底部20px
-        left: '35%',
-        transform: 'translateX(-50%)',
-        zIndex: 100
+        display: 'flex',
+        gap: '8px'
       }}>
         <button
           onClick={() => setShowOptions(true)}
+          disabled={isLoading}
           style={{
-            padding: '16px 32px',
-            fontSize: '18px',
-            backgroundColor: '#4CAF50',
-            color: 'white',
+            padding: '8px 16px',
+            backgroundColor: 'rgb(248,234,212)',
+            color: 'rgb(61,60,61)',
             border: 'none',
             borderRadius: '8px',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            ':hover': {
-              transform: 'translateY(-2px)',
-              boxShadow: '0 6px 16px rgba(0, 0, 0, 0.25)'
-            }
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            opacity: isLoading ? 0.5 : 1
           }}
         >
+          <img 
+            src="https://api.iconify.design/fluent:upload-24-filled.svg" 
+            alt="Upload" 
+            style={{
+              width: '20px',
+              height: '20px',
+              filter: 'invert(0.2)'
+            }}
+          />
           Upload
         </button>
       </div>
-      {renderUploadOptions()}
-    </>
+
+      {showOptions && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(61, 60, 61, 0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1001
+        }}>
+          <div style={{
+            backgroundColor: 'rgb(248,234,212)',
+            padding: '24px',
+            borderRadius: '12px',
+            width: '400px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+          }}>
+            <h3 style={{
+              margin: '0 0 16px 0',
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: 'rgb(61,60,61)'
+            }}>
+              Upload File
+            </h3>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}>
+              <div style={{
+                display: 'flex',
+                gap: '8px'
+              }}>
+                <button
+                  onClick={() => setSelectedOption('file')}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    backgroundColor: selectedOption === 'file' ? 'rgb(61,60,61)' : 'transparent',
+                    color: selectedOption === 'file' ? 'rgb(248,234,212)' : 'rgb(61,60,61)',
+                    border: '1px solid rgb(61,60,61)',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <img 
+                    src="https://api.iconify.design/fluent:document-24-filled.svg" 
+                    alt="File" 
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      filter: selectedOption === 'file' ? 'invert(1)' : 'invert(0.2)'
+                    }}
+                  />
+                  File
+                </button>
+                <button
+                  onClick={() => setSelectedOption('text')}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    backgroundColor: selectedOption === 'text' ? 'rgb(61,60,61)' : 'transparent',
+                    color: selectedOption === 'text' ? 'rgb(248,234,212)' : 'rgb(61,60,61)',
+                    border: '1px solid rgb(61,60,61)',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <img 
+                    src="https://api.iconify.design/fluent:text-24-filled.svg" 
+                    alt="Text" 
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      filter: selectedOption === 'text' ? 'invert(1)' : 'invert(0.2)'
+                    }}
+                  />
+                  Text
+                </button>
+              </div>
+
+              {selectedOption === 'file' ? (
+                <div style={{
+                  border: '2px dashed rgb(61,60,61)',
+                  borderRadius: '8px',
+                  padding: '24px',
+                  textAlign: 'center',
+                  cursor: 'pointer'
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const file = e.dataTransfer.files[0];
+                  if (file) {
+                    handleFileChange(e);
+                  }
+                }}
+                onClick={() => {
+                  // This is a placeholder for the file input
+                }}
+                >
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+                  <img 
+                    src="https://api.iconify.design/fluent:upload-24-filled.svg" 
+                    alt="Upload" 
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      marginBottom: '8px',
+                      filter: 'invert(0.2)'
+                    }}
+                  />
+                  <p style={{
+                    margin: '0',
+                    color: 'rgb(61,60,61)'
+                  }}>
+                    Drag and drop a file here, or click to select
+                  </p>
+                </div>
+              ) : (
+                <textarea
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  placeholder="Enter your text here..."
+                  style={{
+                    width: '100%',
+                    height: '200px',
+                    padding: '12px',
+                    border: '1px solid rgb(61,60,61)',
+                    borderRadius: '6px',
+                    resize: 'none',
+                    backgroundColor: 'white',
+                    color: 'rgb(61,60,61)'
+                  }}
+                />
+              )}
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '8px'
+              }}>
+                <button
+                  onClick={() => setShowOptions(false)}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: 'transparent',
+                    color: 'rgb(61,60,61)',
+                    border: '1px solid rgb(61,60,61)',
+                    borderRadius: '6px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpload}
+                  disabled={isLoading || (selectedOption === 'text' && !textInput.trim())}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: 'rgb(61,60,61)',
+                    color: 'rgb(248,234,212)',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: isLoading || (selectedOption === 'text' && !textInput.trim()) ? 'not-allowed' : 'pointer',
+                    opacity: isLoading || (selectedOption === 'text' && !textInput.trim()) ? 0.5 : 1
+                  }}
+                >
+                  {isLoading ? 'Uploading...' : 'Upload'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }; 

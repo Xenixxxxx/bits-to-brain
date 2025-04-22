@@ -242,6 +242,8 @@ const FlowInner = () => {
 
           .react-flow__node {
             transition: all 0.3s ease-in-out;
+            background-color: rgb(248,234,212) !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
           }
 
           .react-flow__edge {
@@ -249,11 +251,11 @@ const FlowInner = () => {
           }
 
           .react-flow__node.selected {
-            box-shadow: 0 0 0 2px #3b82f6;
+            box-shadow: 0 0 0 2px rgb(248,234,212);
           }
 
           .react-flow__node:hover {
-            box-shadow: 0 0 0 2px #3b82f6;
+            box-shadow: 0 0 0 2px rgb(248,234,212);
           }
 
           .react-flow__edge-path {
@@ -266,7 +268,7 @@ const FlowInner = () => {
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(61, 60, 61, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -282,8 +284,8 @@ const FlowInner = () => {
           .loading-spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
+            border: 3px solid rgb(248,234,212);
+            border-top: 3px solid transparent;
             border-radius: 50%;
             animation: spin 1s linear infinite;
           }
@@ -303,7 +305,7 @@ const FlowInner = () => {
             left: 0;
             width: 70%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(61, 60, 61, 0.9);
             z-index: 1000;
             transition: opacity 0.3s ease-in-out;
           }
@@ -328,8 +330,8 @@ const FlowInner = () => {
         }}
       >
         <Background />
-        <Controls />
-        <MiniMap />
+        {/* <Controls /> */}
+        {/* <MiniMap /> */}
         {selectedNode && (
           <NodeDetails
             selectedNode={selectedNode}

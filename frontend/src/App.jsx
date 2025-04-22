@@ -1,29 +1,40 @@
 import React from 'react';
 import { Flow } from './components/Flow/Flow';
 import { ChatDialog } from './components/ChatDialog';
+import { Logo } from './components/Logo';
 
 function App() {
   return (
     <div style={{ 
       display: 'flex', 
+      flexDirection: 'column',
       width: '100vw', 
       height: '100vh',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      backgroundColor: 'rgb(61,60,61)'
     }}>
+      <Logo />
       <div style={{ 
-        width: '70%', 
-        height: '100%',
-        position: 'relative'
+        display: 'flex', 
+        flex: 1,
+        overflow: 'hidden'
       }}>
-        <Flow />
-      </div>
-      <div style={{ 
-        width: '30%', 
-        height: '100%',
-        borderLeft: '1px solid #e5e7eb',
-        backgroundColor: '#f9fafb'
-      }}>
-        <ChatDialog />
+        <div style={{ 
+          width: '70%', 
+          height: '100%',
+          position: 'relative',
+          backgroundColor: 'rgb(61,60,61)'
+        }}>
+          <Flow />
+        </div>
+        <div style={{ 
+          width: '30%', 
+          height: '100%',
+          borderLeft: '1px solid rgb(248,234,212)',
+          backgroundColor: 'rgb(61,60,61)'
+        }}>
+          <ChatDialog />
+        </div>
       </div>
     </div>
   );
