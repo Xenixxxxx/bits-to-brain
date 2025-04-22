@@ -11,7 +11,7 @@ function App() {
       width: '100vw', 
       height: '100vh',
       overflow: 'hidden',
-      backgroundColor: 'rgb(61,60,61)'
+      backgroundColor: 'rgb(224, 207, 224)'
     }}>
       <Logo />
       <div style={{ 
@@ -23,14 +23,14 @@ function App() {
           width: '70%', 
           height: '100%',
           position: 'relative',
-          backgroundColor: 'rgb(61,60,61)'
+          backgroundColor: 'hsl(0, 0.00%, 100.00%)'
         }}>
           <Flow />
         </div>
         <div style={{ 
           width: '30%', 
           height: '100%',
-          borderLeft: '1px solid rgb(248,234,212)',
+          borderLeft: '1px solid rgb(0, 0, 0)',
           backgroundColor: 'rgb(61,60,61)'
         }}>
           <ChatDialog />
