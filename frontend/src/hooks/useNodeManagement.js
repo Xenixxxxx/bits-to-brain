@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { fetchGraphData, fetchNodeDetail, fetchRecommendation, confirmNode } from '../api';
+import { v4 as uuid } from 'uuid';
 
 export const useNodeManagement = ({
   nodes,
@@ -28,10 +29,12 @@ export const useNodeManagement = ({
         setNodes((nds) => nds.filter((node) => !node.data.isRecommendation));
         setEdges((eds) => eds.filter((edge) => !edge.id.startsWith(`edge-${selectedNode.id}-`)));
 
+        recommendations.forEach((rec) => {
+          rec.id = uuid();
+        });
         const newNodes = recommendations.map((rec, index) => {
-          const nodeId = `rec-${selectedNode.id}-${index}`;
           return {
-            id: nodeId,
+            id: rec.id,
             type: 'markdown',
             position: {
               x: selectedNode.position.x + (index - 1) * 200,
@@ -51,10 +54,12 @@ export const useNodeManagement = ({
         const newEdges = recommendations.map((_, index) => ({
           id: `edge-${selectedNode.id}-${index}`,
           source: selectedNode.id,
-          target: `rec-${selectedNode.id}-${index}`,
+          target: _.id,
           animated: true,
           style: { stroke: '#888', strokeDasharray: '5,5' },
         }));
+
+        console.log("newNodes in recommendation:", newNodes);
 
         // 使用 requestAnimationFrame 确保平滑更新
         requestAnimationFrame(() => {
@@ -73,41 +78,31 @@ export const useNodeManagement = ({
   const handleConfirmRecommendation = useCallback(async (nodeId) => {
     try {
       setIsLoading(true);
+      console.log("nodes before confirm:", nodes);
       const confirmedNode = nodes.find(n => n.id === nodeId);
+
+      console.log("confirmedNode:", confirmedNode);
       if (!confirmedNode) return;
 
-      // 保存推荐节点的位置
-      const nodePosition = confirmedNode.position;
+      const nodePositions = new Map();
+
+      nodes.forEach(node => {
+        nodePositions.set(node.id, node.position);
+      });
 
       // Call confirmNode API with the correct parameters
       await confirmNode(
         confirmedNode.data.title,
         confirmedNode.data.summary,
-        confirmedNode.data.sourceNodeId
+        confirmedNode.data.sourceNodeId,
+        confirmedNode.id
       );
 
       // 使用 fetchData 函数更新图，但保持推荐节点的位置
       const data = await fetchGraphData();
       if (data) {
-        // 清除所有推荐节点
-        setNodes((nds) => nds.filter((node) => !node.data.isRecommendation));
-        setEdges((eds) => eds.filter((edge) => !edge.id.startsWith(`edge-${confirmedNode.data.sourceNodeId}-`)));
-
         // 更新节点和边
         const updatedNodes = data.nodes.map(node => {
-          // 如果是刚确认的推荐节点，使用保存的位置
-          if (node.uuid === nodeId) {
-            return {
-              id: node.uuid,
-              type: 'markdown',
-              position: nodePosition,
-              data: {
-                label: node.title,
-                content: node.title,
-                isRecommendation: false
-              }
-            };
-          }
           // 其他节点使用原有位置或计算新位置
           return {
             id: node.uuid,
@@ -130,6 +125,8 @@ export const useNodeManagement = ({
           target: edge.target,
           style: { stroke: '#000' }
         }));
+
+        console.log("updatedNodes:", updatedNodes);
 
         // 使用 requestAnimationFrame 确保平滑更新
         requestAnimationFrame(() => {

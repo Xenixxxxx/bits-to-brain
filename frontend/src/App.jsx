@@ -11,7 +11,7 @@ function App() {
       width: '100vw', 
       height: '100vh',
       overflow: 'hidden',
-      backgroundColor: 'rgb(224, 207, 224)'
+      backgroundColor: 'rgb(27, 54, 82)'
     }}>
       <Logo />
       <div style={{ 

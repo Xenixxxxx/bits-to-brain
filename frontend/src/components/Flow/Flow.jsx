@@ -242,7 +242,7 @@ const FlowInner = () => {
 
           .react-flow__node {
             transition: all 0.3s ease-in-out;
-            background-color: rgb(248,234,212) !important;
+            background-color: rgb(21, 53, 85);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
           }
 
@@ -251,11 +251,11 @@ const FlowInner = () => {
           }
 
           .react-flow__node.selected {
-            box-shadow: 0 0 0 2px rgb(248,234,212);
+            box-shadow: 0 0 0 2px rgb(22, 179, 48);
           }
 
           .react-flow__node:hover {
-            box-shadow: 0 0 0 2px rgb(248,234,212);
+            box-shadow: 0 0 0 2px rgb(163, 109, 21);
           }
 
           .react-flow__edge-path {
@@ -328,8 +328,9 @@ const FlowInner = () => {
         onInit={(instance) => {
           reactFlowInstance.setViewport({ x: 0, y: 0, zoom: 1 });
         }}
+        style={{ backgroundColor: 'rgb(248, 249, 250)' }}
       >
-        <Background />
+        <Background color="rgb(248,234,212)" gap={16} size={1} />
         {/* <Controls /> */}
         {/* <MiniMap /> */}
         {selectedNode && (

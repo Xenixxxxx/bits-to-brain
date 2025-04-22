@@ -140,14 +140,15 @@ export const fetchRecommendation = async (nodeId) => {
   }
 };
 
-export const confirmNode = async (title, summary, fromId) => {
+export const confirmNode = async (title, summary, fromId, newid) => {
   const apiUrl = `http://localhost:8080/api/node/confirm`;
 
   try {
     const data = {
       title: title,
       summary: summary,
-      fromId: fromId
+      fromId: fromId,
+      uuid: newid
     };
 
     const response = await fetch(apiUrl, {

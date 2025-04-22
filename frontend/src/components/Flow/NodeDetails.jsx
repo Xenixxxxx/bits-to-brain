@@ -66,7 +66,10 @@ export const NodeDetails = ({
 
       // 自动获取推荐
       if (!selectedNode.data.isRecommendation && !hasPendingRecommendations) {
-        onRecommend();
+        // 使用 setTimeout 确保在动画开始后再调用推荐
+        setTimeout(() => {
+          onRecommend();
+        }, 100);
       }
 
       // 添加视口变化监听
@@ -174,8 +177,8 @@ export const NodeDetails = ({
         {hasRecommendations && (
           <button
             onClick={async () => {
-              onClose();
               await onConfirm(selectedNode.id);
+              onClose();
             }}
             style={{
               padding: '6px 12px',
@@ -189,7 +192,7 @@ export const NodeDetails = ({
               width: '100%'
             }}
           >
-            确认
+            Confirm
           </button>
         )}
       </div>
