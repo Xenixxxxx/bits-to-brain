@@ -28,8 +28,7 @@ public class UploadController {
             @RequestPart(value = "text", required = false) String text,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) throws IOException {
-
-        String autoPrompt = "";
+        Map<String, Object> inputMap = new HashMap<>();
         String inputContent = null;
         String parserName = null;
 
@@ -43,43 +42,36 @@ public class UploadController {
                 byte[] imageBytes = file.getBytes();
                 String base64Image = Base64.getEncoder().encodeToString(imageBytes);
                 inputContent = "data:" + contentType + ";base64," + base64Image;
-                autoPrompt = "Please extract meaningful knowledge from this image.";
                 parserName = "parseImageTool";
 
             } else if (contentType.startsWith("video/")) {
-                inputContent = "[Video uploaded; processing module required to extract frames/audio.]";
-                autoPrompt = "This is a video uploaded by the user. Please summarize its main concepts for the knowledge graph.";
+                inputMap.put("file", file);
                 parserName = VIDEO_PARSER_NAME;
 
             } else if (contentType.equals("text/plain") || contentType.equals("application/pdf")) {
                 inputContent = new String(file.getBytes());
-                autoPrompt = "Please extract core knowledge points from the following content and structure them.";
                 parserName = "parseTextTool";
             } else {
                 return ResponseEntity.badRequest().body("Unsupported file type: " + contentType);
             }
         } else if (text != null && !text.isEmpty()) {
             if (text.startsWith("http://") || text.startsWith("https://")) {
-                if (text.contains("tiktok.com") || text.contains("youtube.com")) {
+                if (text.contains("youtube.com")) {
                     parserName = YOUTUBE_PARSER_NAME;
                     inputContent = text;
-                    autoPrompt = "Please extract knowledge from the following short video link:";
                 } else {
                     parserName = URL_PARSER_NAME;
                     inputContent = text;
-                    autoPrompt = "Please extract key knowledge points from the following webpage:";
                 }
             } else {
                 parserName = TEXT_PARSER_NAME;
                 inputContent = text;
-                autoPrompt = "Please transform the following content into a structured knowledge node:";
             }
         } else {
             return ResponseEntity.badRequest().body("No valid input provided.");
         }
 
-        Map<String, Object> inputMap = new HashMap<>();
-        inputMap.put("prompt", autoPrompt);
+
         inputMap.put("content", inputContent);
 
         Object result = parserManager.call(parserName, inputMap);
