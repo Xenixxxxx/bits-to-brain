@@ -50,13 +50,15 @@ public class KnowledgeService {
     }
 
 
-    public String saveFromParsedResult(Map<String, Object> parsed) {
+    public void saveFromParsedResult(Map<String, Object> parsed) {
         String title = (String) parsed.getOrDefault("title", "Untitled");
         String summary = (String) parsed.getOrDefault("summary", "");
         String type = (String) parsed.getOrDefault("type", "unknown");
         String createdAt = Instant.now().toString();
-
-        String uuid = UUID.randomUUID().toString();
+        String uuid = (String) parsed.getOrDefault("uuid", UUID.randomUUID().toString());
+        if (uuid.isBlank()){
+            uuid = UUID.randomUUID().toString();
+        }
 
         Metadata metadata = new Metadata();
         metadata.put("uuid", uuid);
@@ -76,7 +78,7 @@ public class KnowledgeService {
             log.info("[KnowledgeService] Found similar Score: {}, document: {}", r.score(), r.embedded().text());
             if (r.score() == 1) {
                 log.info("[KnowledgeService] Exact match found, not saving.");
-                return "";
+                return;
             }
         }
 
@@ -93,7 +95,6 @@ public class KnowledgeService {
             log.info("[KnowledgeService] Created link from {} to {} with score {}", uuid, toId, score);
         }
         log.info("[KnowledgeService] Links created.");
-        return uuid;
     }
 
     public void createRelationship(String fromId, String toId, double score) {
@@ -221,7 +222,7 @@ public class KnowledgeService {
     }
 
 
-    public void confirmAndSave(String title, String summary, String fromId) {
+    public void confirmAndSave(String title, String summary, String fromId, String newId) {
         String prompt = String.format(RECOMMEND_CONFIRM, title, summary);
 
         String fullText = chatLanguageModel.chat(prompt);
@@ -229,10 +230,11 @@ public class KnowledgeService {
         Map<String, Object> parsedResult = Map.of(
                 "title", title,
                 "summary", fullText,
-                "type", "generated"
+                "type", "generated",
+                "uuid", newId
         );
 
-        String newId = saveFromParsedResult(parsedResult);
+        saveFromParsedResult(parsedResult);
         createRelationship(fromId, newId, 0);
         log.info("[KnowledgeService] Created relationship from {} to {}", fromId, newId);
     }

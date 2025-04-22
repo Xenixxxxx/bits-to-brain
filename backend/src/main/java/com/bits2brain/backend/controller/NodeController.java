@@ -40,13 +40,14 @@ public class NodeController {
         String title = request.get("title");
         String summary = request.get("summary");
         String fromId = request.get("fromId");
+        String uuid = request.get("uuid");
 
         if (title == null || summary == null || fromId == null ||
                 title.isEmpty() || summary.isEmpty() || fromId.isEmpty()) {
             return ResponseEntity.badRequest().body("Missing required fields");
         }
 
-        knowledgeService.confirmAndSave(title, summary, fromId);
+        knowledgeService.confirmAndSave(title, summary, fromId, uuid);
         return ResponseEntity.ok("Saved and linked");
     }
 }
