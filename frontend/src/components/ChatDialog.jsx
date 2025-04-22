@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { sendMessage } from '../api/chat';
+import ReactMarkdown from 'react-markdown';
 
 export const ChatDialog = () => {
   const [messages, setMessages] = useState([]);
@@ -31,15 +32,27 @@ export const ChatDialog = () => {
         // Response with buttons
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: response.content,
+          content: response.response,
           buttons: response.buttons
         }]);
       } else {
         // Simple text response
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: response.content
+          content: response.response
         }]);
+      }
+
+      // 刷新流程图，但保持节点选中状态
+      if (window.refreshFlow) {
+        const currentSelectedNode = window.getSelectedNode?.();
+        window.refreshFlow();
+        if (currentSelectedNode) {
+          // 等待刷新完成后重新选中节点
+          setTimeout(() => {
+            window.setSelectedNode?.(currentSelectedNode);
+          }, 100);
+        }
       }
     } catch (error) {
       setMessages(prev => [...prev, {
@@ -67,6 +80,18 @@ export const ChatDialog = () => {
         content: response.content,
         buttons: response.buttons
       }]);
+
+      // 刷新流程图，但保持节点选中状态
+      if (window.refreshFlow) {
+        const currentSelectedNode = window.getSelectedNode?.();
+        window.refreshFlow();
+        if (currentSelectedNode) {
+          // 等待刷新完成后重新选中节点
+          setTimeout(() => {
+            window.setSelectedNode?.(currentSelectedNode);
+          }, 100);
+        }
+      }
     } catch (error) {
       setMessages(prev => [...prev, {
         role: 'assistant',
@@ -114,7 +139,75 @@ export const ChatDialog = () => {
                 wordBreak: 'break-word'
               }}
             >
-              {message.content}
+              <ReactMarkdown
+                components={{
+                  p: ({ children }) => <p style={{ margin: 0 }}>{children}</p>,
+                  h1: ({ children }) => <h1 style={{ fontSize: '1.5rem', margin: '0.5rem 0' }}>{children}</h1>,
+                  h2: ({ children }) => <h2 style={{ fontSize: '1.25rem', margin: '0.5rem 0' }}>{children}</h2>,
+                  h3: ({ children }) => <h3 style={{ fontSize: '1.125rem', margin: '0.5rem 0' }}>{children}</h3>,
+                  ul: ({ children }) => <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>{children}</ul>,
+                  ol: ({ children }) => <ol style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>{children}</ol>,
+                  li: ({ children }) => <li style={{ margin: '0.25rem 0' }}>{children}</li>,
+                  code: ({ children }) => (
+                    <code style={{
+                      backgroundColor: message.role === 'user' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                      padding: '0.2rem 0.4rem',
+                      borderRadius: '0.25rem',
+                      fontFamily: 'monospace'
+                    }}>
+                      {children}
+                    </code>
+                  ),
+                  pre: ({ children }) => (
+                    <pre style={{
+                      backgroundColor: message.role === 'user' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                      padding: '0.75rem',
+                      borderRadius: '0.5rem',
+                      overflowX: 'auto',
+                      margin: '0.5rem 0'
+                    }}>
+                      {children}
+                    </pre>
+                  ),
+                  blockquote: ({ children }) => (
+                    <blockquote style={{
+                      borderLeft: '4px solid',
+                      borderColor: message.role === 'user' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.2)',
+                      margin: '0.5rem 0',
+                      paddingLeft: '1rem',
+                      fontStyle: 'italic'
+                    }}>
+                      {children}
+                    </blockquote>
+                  ),
+                  a: ({ href, children }) => (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: message.role === 'user' ? 'white' : '#3b82f6',
+                        textDecoration: 'underline'
+                      }}
+                    >
+                      {children}
+                    </a>
+                  ),
+                  img: ({ src, alt }) => (
+                    <img
+                      src={src}
+                      alt={alt}
+                      style={{
+                        maxWidth: '100%',
+                        borderRadius: '0.5rem',
+                        margin: '0.5rem 0'
+                      }}
+                    />
+                  )
+                }}
+              >
+                {message.content}
+              </ReactMarkdown>
             </div>
             {message.buttons && (
               <div style={{

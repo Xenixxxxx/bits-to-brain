@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -6,6 +6,8 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
+  useReactFlow,
+  ReactFlowProvider
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { fetchGraphData, fetchNodeDetail, fetchRecommendation, confirmNode } from '../../api';
@@ -18,23 +20,71 @@ const nodeTypes = {
   markdown: MarkdownNode,
 };
 
-export const Flow = () => {
+// 创建一个全局对象来存储节点位置
+const nodePositions = new Map();
+
+// 防抖函数
+const debounce = (func, wait) => {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
+// 内部 Flow 组件
+const FlowInner = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
   const [hasPendingRecommendations, setHasPendingRecommendations] = useState(false);
   const [recommendationNodes, setRecommendationNodes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const previousDataRef = useRef(null);
+  const reactFlowInstance = useReactFlow();
+
+  // 计算节点位置的函数
+  const calculateNodePosition = useCallback((nodeId) => {
+    // 如果节点位置已经存在，返回保存的位置
+    if (nodePositions.has(nodeId)) {
+      return nodePositions.get(nodeId);
+    }
+
+    // 否则计算新位置
+    const position = {
+      x: Math.random() * 500,
+      y: Math.random() * 300
+    };
+
+    // 保存位置
+    nodePositions.set(nodeId, position);
+    return position;
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
-      setIsLoading(true);
+      setIsRefreshing(true);
       const data = await fetchGraphData();
+      
+      // 检查数据是否真的发生了变化
+      const dataString = JSON.stringify(data);
+      if (dataString === JSON.stringify(previousDataRef.current)) {
+        setIsRefreshing(false);
+        return;
+      }
+      
+      previousDataRef.current = data;
+
       if (data) {
         const initialNodes = data.nodes.map(node => ({
           id: node.uuid,
           type: 'markdown',
-          position: { x: Math.random() * 500, y: Math.random() * 300 },
+          position: calculateNodePosition(node.uuid),
           data: {
             label: node.title,
             content: node.title,
@@ -49,15 +99,26 @@ export const Flow = () => {
           style: { stroke: '#000' }
         }));
 
-        setNodes(initialNodes);
-        setEdges(initialEdges);
+        // 使用 requestAnimationFrame 来确保平滑更新
+        requestAnimationFrame(() => {
+          setNodes(initialNodes);
+          setEdges(initialEdges);
+        });
       }
     } catch (error) {
       console.error('Error fetching graph data:', error);
     } finally {
-      setIsLoading(false);
+      setIsRefreshing(false);
     }
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, calculateNodePosition]);
+
+  // 使用防抖的刷新函数
+  const debouncedRefresh = useCallback(
+    debounce(() => {
+      fetchData();
+    }, 300),
+    [fetchData]
+  );
   
   const { handleRecommendation, handleConfirmRecommendation } = useNodeManagement({
     nodes,
@@ -70,7 +131,7 @@ export const Flow = () => {
     setHasPendingRecommendations,
     recommendationNodes,
     setRecommendationNodes,
-    fetchData,
+    fetchData: debouncedRefresh,
     setIsLoading
   });
 
@@ -79,13 +140,11 @@ export const Flow = () => {
   }, [fetchData]);
 
   const onNodeClick = useCallback(async (event, node) => {
-    // If the node is a recommendation node, it already has detail data
     if (node.data.isRecommendation) {
       setSelectedNode(node);
       return;
     }
 
-    // For regular nodes, fetch details
     try {
       const detail = await fetchNodeDetail(node.id);
       setSelectedNode({
@@ -97,9 +156,8 @@ export const Flow = () => {
     }
   }, []);
 
-  // Add node drag stop handler
-  const onNodeDragStop = useCallback((event, node) => {
-    // Update node position
+  const onNodeDrag = useCallback((event, node) => {
+    // 实时更新节点位置
     setNodes((nds) =>
       nds.map((n) => {
         if (n.id === node.id) {
@@ -113,54 +171,49 @@ export const Flow = () => {
     );
   }, [setNodes]);
 
+  const onNodeDragStop = useCallback((event, node) => {
+    const newPosition = node.position;
+    nodePositions.set(node.id, newPosition);
+    
+    // 更新节点位置
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.id === node.id) {
+          return {
+            ...n,
+            position: newPosition,
+          };
+        }
+        return n;
+      })
+    );
+
+    // 更新边的位置
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.source === node.id || edge.target === node.id) {
+          return {
+            ...edge,
+            // 强制边重新计算位置
+            id: `${edge.id}-${Date.now()}`,
+          };
+        }
+        return edge;
+      })
+    );
+  }, [setNodes, setEdges]);
+
+  // 导出刷新函数和节点选中状态管理函数
+  window.refreshFlow = debouncedRefresh;
+  window.getSelectedNode = () => selectedNode;
+  window.setSelectedNode = (node) => {
+    if (node) {
+      setSelectedNode(node);
+    }
+  };
+
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      {isLoading && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(255, 255, 255, 0.7)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            alignItems: 'center'
-          }}>
-            <div style={{
-              width: '12px',
-              height: '12px',
-              backgroundColor: '#3498db',
-              borderRadius: '50%',
-              animation: 'bounce 0.5s ease-in-out infinite alternate',
-              animationDelay: '0s'
-            }} />
-            <div style={{
-              width: '12px',
-              height: '12px',
-              backgroundColor: '#3498db',
-              borderRadius: '50%',
-              animation: 'bounce 0.5s ease-in-out infinite alternate',
-              animationDelay: '0.2s'
-            }} />
-            <div style={{
-              width: '12px',
-              height: '12px',
-              backgroundColor: '#3498db',
-              borderRadius: '50%',
-              animation: 'bounce 0.5s ease-in-out infinite alternate',
-              animationDelay: '0.4s'
-            }} />
-          </div>
-        </div>
-      )}
-
       <style>
         {`
           @keyframes bounce {
@@ -171,6 +224,89 @@ export const Flow = () => {
               transform: translateY(-20px);
             }
           }
+
+          @keyframes pulse {
+            0% {
+              transform: scale(0.95);
+              opacity: 0.5;
+            }
+            50% {
+              transform: scale(1);
+              opacity: 0.8;
+            }
+            100% {
+              transform: scale(0.95);
+              opacity: 0.5;
+            }
+          }
+
+          .react-flow__node {
+            transition: all 0.3s ease-in-out;
+          }
+
+          .react-flow__edge {
+            transition: all 0.3s ease-in-out;
+          }
+
+          .react-flow__node.selected {
+            box-shadow: 0 0 0 2px #3b82f6;
+          }
+
+          .react-flow__node:hover {
+            box-shadow: 0 0 0 2px #3b82f6;
+          }
+
+          .react-flow__edge-path {
+            transition: d 0.3s ease-in-out;
+          }
+
+          .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+          }
+
+          .loading-overlay.visible {
+            opacity: 1;
+          }
+
+          .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+
+          @keyframes spin {
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
+          }
+
+          .node-details-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 70%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 1000;
+            transition: opacity 0.3s ease-in-out;
+          }
         `}
       </style>
 
@@ -180,26 +316,45 @@ export const Flow = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
+        onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
         fitView
+        nodesDraggable={true}
+        nodesConnectable={true}
+        elementsSelectable={true}
+        onInit={(instance) => {
+          reactFlowInstance.setViewport({ x: 0, y: 0, zoom: 1 });
+        }}
       >
         <Background />
         <Controls />
         <MiniMap />
+        {selectedNode && (
+          <NodeDetails
+            selectedNode={selectedNode}
+            onClose={() => setSelectedNode(null)}
+            onRecommend={handleRecommendation}
+            onConfirm={handleConfirmRecommendation}
+            hasRecommendations={selectedNode?.data?.isRecommendation}
+            hasPendingRecommendations={hasPendingRecommendations}
+            isLoading={isLoading}
+          />
+        )}
       </ReactFlow>
 
-      <NodeDetails
-        selectedNode={selectedNode}
-        onClose={() => setSelectedNode(null)}
-        onRecommend={handleRecommendation}
-        onConfirm={handleConfirmRecommendation}
-        hasRecommendations={selectedNode?.data?.isRecommendation}
-        hasPendingRecommendations={hasPendingRecommendations}
-        isLoading={isLoading}
-      />
+      <div className={`loading-overlay ${isLoading ? 'visible' : ''}`} style={{ pointerEvents: 'none' }}>
+        <div className="loading-spinner" />
+      </div>
 
-      <UploadBox onUploadSuccess={fetchData} isLoading={isLoading} setIsLoading={setIsLoading} />
+      <UploadBox onUploadSuccess={debouncedRefresh} isLoading={isLoading} setIsLoading={setIsLoading} />
     </div>
   );
-}; 
+};
+
+// 导出包装了 Provider 的 Flow 组件
+export const Flow = () => (
+  <ReactFlowProvider>
+    <FlowInner />
+  </ReactFlowProvider>
+); 
