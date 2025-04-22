@@ -1,4 +1,4 @@
-package com.bits2brain.backend.agent.tools;
+package com.bits2brain.backend.agent.parsers;
 
 import com.bits2brain.backend.service.KnowledgeService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -16,24 +16,25 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
+import static com.bits2brain.backend.util.Const.URL_PARSER_NAME;
 import static com.bits2brain.backend.util.prompts.TEXT_EXTRACT;
 
 @Slf4j
 @Component
-class ParseUrlTool implements AgentTool {
+class UrlParser implements Parser {
 
     private final ChatLanguageModel chatModel;
     private final KnowledgeService knowledgeService;
 
     @Autowired
-    public ParseUrlTool(ChatLanguageModel chatModelProvider, KnowledgeService knowledgeService) {
+    public UrlParser(ChatLanguageModel chatModelProvider, KnowledgeService knowledgeService) {
         this.chatModel = chatModelProvider;
         this.knowledgeService = knowledgeService;
     }
 
     @Override
     public String getName() {
-        return "parseUrlTool";
+        return URL_PARSER_NAME;
     }
 
     @Override
@@ -44,7 +45,7 @@ class ParseUrlTool implements AgentTool {
             return Map.of("error", "No URL provided.");
         }
 
-        log.info("[parseUrlTool] Fetching webpage from: {}", url);
+        log.info("[urlParser] Fetching webpage from: {}", url);
 
         String pageText;
         Instant t1 = Instant.now();
@@ -52,12 +53,12 @@ class ParseUrlTool implements AgentTool {
             Document doc = Jsoup.connect(url).get();
             pageText = doc.body().text();
         } catch (IOException e) {
-            log.error("[parseUrlTool] Failed to fetch webpage: {}", e.getMessage());
+            log.error("[urlParser] Failed to fetch webpage: {}", e.getMessage());
             return Map.of("error", "Failed to load webpage", "details", e.getMessage());
         }
         Instant t2 = Instant.now();
 
-        log.info("[parseUrlTool] Webpage fetched successfully in {} ms", Duration.between(t1, t2).toMillis());
+        log.info("[urlParser] Webpage fetched successfully in {} ms", Duration.between(t1, t2).toMillis());
 
         String truncatedText = TextTruncator.truncate(pageText);
         String prompt = TEXT_EXTRACT + truncatedText;
@@ -67,21 +68,21 @@ class ParseUrlTool implements AgentTool {
             String result = chatModel.chat(prompt);
             Instant t4 = Instant.now();
 
-            log.info("[parseUrlTool] LLM response completed in {} ms", Duration.between(t3, t4).toMillis());
+            log.info("[urlParser] LLM response completed in {} ms", Duration.between(t3, t4).toMillis());
 
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> parsed = mapper.readValue(result, new TypeReference<>() {});
-            parsed.put("source", "parseUrlTool");
+            parsed.put("source", "urlParser");
             parsed.put("timing", Map.of(
                     "fetchTimeMs", Duration.between(t1, t2).toMillis(),
                     "llmTimeMs", Duration.between(t3, t4).toMillis()
             ));
 
-            log.info("[parseUrlTool] Parsed result: {}", parsed);
+            log.info("[urlParser] Parsed result: {}", parsed);
             knowledgeService.saveFromParsedResult(parsed);
             return parsed;
         } catch (Exception e) {
-            log.error("[parseUrlTool] Chat model processing failed", e);
+            log.error("[urlParser] Chat model processing failed", e);
             return Map.of("error", "Chat model processing failed", "details", e.getMessage());
         }
     }

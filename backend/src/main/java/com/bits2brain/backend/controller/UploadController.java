@@ -1,6 +1,6 @@
 package com.bits2brain.backend.controller;
 
-import com.bits2brain.backend.agent.ToolManager;
+import com.bits2brain.backend.agent.ParserManager;
 import jakarta.annotation.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,16 +11,19 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.bits2brain.backend.util.Const.TEXT_PARSER_NAME;
+import static com.bits2brain.backend.util.Const.URL_PARSER_NAME;
+
+/**
+ * Controller for handling file uploads and text input.
+ * It processes the input and returns the result from the appropriate parser.
+ */
 @RestController
 @RequestMapping("/api/agent")
 public class UploadController {
     @Resource
-    private ToolManager toolManager;
+    private ParserManager parserManager;
 
-    /**
-     * Unified endpoint for uploading multimodal content (text, URL, image, video, PDF, etc.)
-     * Automatically generates a prompt based on content type and delegates to the appropriate tool by name.
-     */
     @PostMapping("/upload")
     public ResponseEntity<?> handleUpload(
             @RequestPart(value = "text", required = false) String text,
@@ -29,7 +32,7 @@ public class UploadController {
 
         String autoPrompt = "";
         String inputContent = null;
-        String toolName = null;
+        String parserName = null;
 
         if (file != null && !file.isEmpty()) {
             String contentType = file.getContentType();
@@ -42,17 +45,17 @@ public class UploadController {
                 String base64Image = Base64.getEncoder().encodeToString(imageBytes);
                 inputContent = "data:" + contentType + ";base64," + base64Image;
                 autoPrompt = "Please extract meaningful knowledge from this image.";
-                toolName = "parseImageTool";
+                parserName = "parseImageTool";
 
             } else if (contentType.startsWith("video/")) {
                 inputContent = "[Video uploaded; processing module required to extract frames/audio.]";
                 autoPrompt = "This is a video uploaded by the user. Please summarize its main concepts for the knowledge graph.";
-                toolName = "parseVideoTool";
+                parserName = "parseVideoTool";
 
             } else if (contentType.equals("text/plain") || contentType.equals("application/pdf")) {
                 inputContent = new String(file.getBytes());
                 autoPrompt = "Please extract core knowledge points from the following content and structure them.";
-                toolName = "parseTextTool";
+                parserName = "parseTextTool";
             } else {
                 return ResponseEntity.badRequest().body("Unsupported file type: " + contentType);
             }
@@ -60,11 +63,11 @@ public class UploadController {
             if (text.startsWith("http://") || text.startsWith("https://")) {
                 inputContent = text;
                 autoPrompt = "Please extract key knowledge points from the following webpage:";
-                toolName = "parseUrlTool";
+                parserName = URL_PARSER_NAME;
             } else {
                 inputContent = text;
                 autoPrompt = "Please transform the following content into a structured knowledge node:";
-                toolName = "parseTextTool";
+                parserName = TEXT_PARSER_NAME;
             }
         } else {
             return ResponseEntity.badRequest().body("No valid input provided.");
@@ -74,7 +77,7 @@ public class UploadController {
         inputMap.put("prompt", autoPrompt);
         inputMap.put("content", inputContent);
 
-        Object result = toolManager.call(toolName, inputMap);
+        Object result = parserManager.call(parserName, inputMap);
         return ResponseEntity.ok(result);
     }
 }

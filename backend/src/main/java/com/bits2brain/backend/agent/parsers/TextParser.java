@@ -1,4 +1,4 @@
-package com.bits2brain.backend.agent.tools;
+package com.bits2brain.backend.agent.parsers;
 
 import com.bits2brain.backend.service.KnowledgeService;
 import com.bits2brain.backend.util.TextTruncator;
@@ -12,12 +12,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.Map;
 
+import static com.bits2brain.backend.util.Const.TEXT_PARSER_NAME;
 import static com.bits2brain.backend.util.prompts.TEXT_EXTRACT;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ParseTextTool implements AgentTool {
+public class TextParser implements Parser {
 
     private final ChatLanguageModel chatModel;
     private final KnowledgeService knowledgeService;
@@ -25,7 +26,7 @@ public class ParseTextTool implements AgentTool {
 
     @Override
     public String getName() {
-        return "parseTextTool";
+        return TEXT_PARSER_NAME;
     }
 
     @Override
