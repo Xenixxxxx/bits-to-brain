@@ -9,6 +9,7 @@ import ReactFlow, {
   useReactFlow,
   ReactFlowProvider
 } from 'reactflow';
+import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide } from 'd3-force';
 import 'reactflow/dist/style.css';
 import { fetchGraphData, fetchNodeDetail, fetchRecommendation, confirmNode } from '../../api';
 import { MarkdownNode } from '../MarkdownNode';
@@ -36,6 +37,50 @@ const debounce = (func, wait) => {
   };
 };
 
+// 计算力导向布局
+const getForceLayoutedElements = (nodes, edges) => {
+  // 创建节点和边的副本，避免修改原始数据
+  const nodesCopy = nodes.map(node => ({ ...node }));
+  const edgesCopy = edges.map(edge => ({ ...edge }));
+
+  // 创建力导向模拟
+  const simulation = forceSimulation(nodesCopy)
+    .force('link', forceLink(edgesCopy)
+      .id(d => d.id)
+      .distance(200)  // 边的长度
+      .strength(0.5)  // 边的强度
+    )
+    .force('charge', forceManyBody()
+      .strength(-1000)  // 节点间的排斥力
+    )
+    .force('center', forceCenter(0, 0))  // 中心力
+    .force('collision', forceCollide()
+      .radius(100)  // 节点碰撞半径
+      .strength(0.7)  // 碰撞强度
+    );
+
+  // 运行模拟
+  simulation.tick(300);  // 运行300次迭代
+
+  // 获取计算后的节点位置
+  const layoutedNodes = nodesCopy.map(node => ({
+    ...node,
+    position: {
+      x: node.x,
+      y: node.y
+    }
+  }));
+
+  // 保持原始边的 source 和 target
+  const layoutedEdges = edges.map(edge => ({
+    ...edge,
+    source: edge.source,
+    target: edge.target
+  }));
+
+  return { nodes: layoutedNodes, edges: layoutedEdges };
+};
+
 // 内部 Flow 组件
 const FlowInner = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -47,24 +92,6 @@ const FlowInner = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const previousDataRef = useRef(null);
   const reactFlowInstance = useReactFlow();
-
-  // 计算节点位置的函数
-  const calculateNodePosition = useCallback((nodeId) => {
-    // 如果节点位置已经存在，返回保存的位置
-    if (nodePositions.has(nodeId)) {
-      return nodePositions.get(nodeId);
-    }
-
-    // 否则计算新位置
-    const position = {
-      x: Math.random() * 500,
-      y: Math.random() * 300
-    };
-
-    // 保存位置
-    nodePositions.set(nodeId, position);
-    return position;
-  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -84,7 +111,6 @@ const FlowInner = () => {
         const initialNodes = data.nodes.map(node => ({
           id: node.uuid,
           type: 'markdown',
-          position: calculateNodePosition(node.uuid),
           data: {
             label: node.title,
             content: node.title,
@@ -96,13 +122,27 @@ const FlowInner = () => {
           id: `edge-${edge.source}-${edge.target}`,
           source: edge.source,
           target: edge.target,
-          style: { stroke: '#000' }
+          sourceHandle: 'source',
+          targetHandle: 'target',
+          type: 'straight',
+          animated: false,
+          style: { 
+            stroke: 'rgb(0, 0, 0)',
+            strokeWidth: 2
+          }
         }));
+
+        // 应用力导向布局
+        const { nodes: layoutedNodes, edges: layoutedEdges } = getForceLayoutedElements(
+          initialNodes,
+          initialEdges
+        );
 
         // 使用 requestAnimationFrame 来确保平滑更新
         requestAnimationFrame(() => {
-          setNodes(initialNodes);
-          setEdges(initialEdges);
+          setNodes(layoutedNodes);
+          setEdges(layoutedEdges);
+          console.log('Setting edges:', layoutedEdges);
         });
       }
     } catch (error) {
@@ -110,7 +150,7 @@ const FlowInner = () => {
     } finally {
       setIsRefreshing(false);
     }
-  }, [setNodes, setEdges, calculateNodePosition]);
+  }, [setNodes, setEdges]);
 
   // 使用防抖的刷新函数
   const debouncedRefresh = useCallback(
@@ -139,6 +179,11 @@ const FlowInner = () => {
     fetchData();
   }, [fetchData]);
 
+  // 添加边的状态变化监听
+  useEffect(() => {
+    console.log('Edges updated:', edges);
+  }, [edges]);
+
   const onNodeClick = useCallback(async (event, node) => {
     if (node.data.isRecommendation) {
       setSelectedNode(node);
@@ -157,7 +202,7 @@ const FlowInner = () => {
   }, []);
 
   const onNodeDrag = useCallback((event, node) => {
-    // 实时更新节点位置
+    // 实时更新节点位置，但不触发边的重渲染
     setNodes((nds) =>
       nds.map((n) => {
         if (n.id === node.id) {
@@ -194,7 +239,7 @@ const FlowInner = () => {
         if (edge.source === node.id || edge.target === node.id) {
           return {
             ...edge,
-            // 强制边重新计算位置
+            // 使用时间戳确保边重新计算位置
             id: `${edge.id}-${Date.now()}`,
           };
         }
@@ -241,25 +286,23 @@ const FlowInner = () => {
           }
 
           .react-flow__node {
-            transition: all 0.3s ease-in-out;
-            background-color: rgb(21, 53, 85);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: none;
           }
 
           .react-flow__edge {
-            transition: all 0.3s ease-in-out;
+            transition: none;
           }
 
           .react-flow__node.selected {
-            box-shadow: 0 0 0 2px rgb(22, 179, 48);
+            box-shadow: 0 0 0 2px rgb(248,234,212);
           }
 
           .react-flow__node:hover {
-            box-shadow: 0 0 0 2px rgb(163, 109, 21);
+            box-shadow: 0 0 0 2px rgb(248,234,212);
           }
 
           .react-flow__edge-path {
-            transition: d 0.3s ease-in-out;
+            transition: none;
           }
 
           .loading-overlay {
@@ -328,7 +371,21 @@ const FlowInner = () => {
         onInit={(instance) => {
           reactFlowInstance.setViewport({ x: 0, y: 0, zoom: 1 });
         }}
-        style={{ backgroundColor: 'rgb(248, 249, 250)' }}
+        style={{ backgroundColor: 'rgb(255, 255, 255)' }}
+        defaultEdgeOptions={{
+          type: 'straight',
+          animated: false,
+          style: { 
+            stroke: 'rgb(0, 0, 0)',
+            strokeWidth: 2
+          }
+        }}
+        edgesFocusable={false}
+        edgesUpdatable={false}
+        nodesFocusable={false}
+        minZoom={0.1}
+        maxZoom={4}
+        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
       >
         <Background color="rgb(248,234,212)" gap={16} size={1} />
         {/* <Controls /> */}

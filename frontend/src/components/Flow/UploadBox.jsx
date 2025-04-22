@@ -50,8 +50,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
       bottom: '20%',
       width: '100%',
       left: '50%',
-      // transform: 'translateX(-50%)',
-      zIndex: 1000
+      zIndex: 1000,
+      fontFamily: 'Inter, sans-serif'
     }}>
       <div style={{
         display: 'flex',
@@ -74,7 +74,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
             alignItems: 'center',
             gap: '8px',
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            opacity: isLoading ? 0.5 : 1
+            opacity: isLoading ? 0.5 : 1,
+            fontFamily: 'Inter, sans-serif'
           }}
         >
           <img 
@@ -101,7 +102,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          zIndex: 1001
+          zIndex: 1001,
+          fontFamily: 'Inter, sans-serif'
         }}>
           <div style={{
             backgroundColor: 'rgb(248,234,212)',
@@ -114,7 +116,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
               margin: '0 0 16px 0',
               fontSize: '1.25rem',
               fontWeight: '600',
-              color: 'rgb(61,60,61)'
+              color: 'rgb(61,60,61)',
+              fontFamily: 'Inter, sans-serif'
             }}>
               Upload
             </h3>
@@ -140,7 +143,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    fontFamily: 'Inter, sans-serif'
                   }}
                 >
                   <img 
@@ -167,7 +171,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    fontFamily: 'Inter, sans-serif'
                   }}
                 >
                   <img 
@@ -189,7 +194,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
                   borderRadius: '8px',
                   padding: '24px',
                   textAlign: 'center',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontFamily: 'Inter, sans-serif'
                 }}
                 onDragOver={(e) => {
                   e.preventDefault();
@@ -224,7 +230,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
                   />
                   <p style={{
                     margin: '0',
-                    color: 'rgb(61,60,61)'
+                    color: 'rgb(61,60,61)',
+                    fontFamily: 'Inter, sans-serif'
                   }}>
                     Drag and drop a file here, or click to select
                   </p>
@@ -242,7 +249,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
                     borderRadius: '6px',
                     resize: 'none',
                     backgroundColor: 'white',
-                    color: 'rgb(61,60,61)'
+                    color: 'rgb(61,60,61)',
+                    fontFamily: 'Inter, sans-serif'
                   }}
                 />
               ) : ('')}
@@ -255,36 +263,37 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
                 {selectedOption ? (
                   <>
                     <button
-                    onClick={() => setShowOptions(false)}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: 'transparent',
-                      color: 'rgb(61,60,61)',
-                      border: '1px solid rgb(61,60,61)',
-                      borderRadius: '6px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleUpload}
-                    disabled={isLoading || (selectedOption === 'text' && !textInput.trim()) || (selectedOption === 'file' && !file)}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: 'rgb(61,60,61)',
-                      color: 'rgb(248,234,212)',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: isLoading || (selectedOption === 'text' && !textInput.trim()) ? 'not-allowed' : 'pointer',
-                      opacity: isLoading || (selectedOption === 'text' && !textInput.trim()) ? 0.5 : 1
-                    }}
-                  >
-                    {isLoading ? 'Uploading...' : 'Upload'}
-                  </button> 
-                </>
+                      onClick={() => setShowOptions(false)}
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: 'transparent',
+                        color: 'rgb(61,60,61)',
+                        border: '1px solid rgb(61,60,61)',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontFamily: 'Inter, sans-serif'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleUpload}
+                      disabled={isLoading || (selectedOption === 'text' && !textInput.trim()) || (selectedOption === 'file' && !file)}
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: 'rgb(61,60,61)',
+                        color: 'rgb(248,234,212)',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: isLoading || (selectedOption === 'text' && !textInput.trim()) || (selectedOption === 'file' && !file) ? 'not-allowed' : 'pointer',
+                        opacity: isLoading || (selectedOption === 'text' && !textInput.trim()) || (selectedOption === 'file' && !file) ? 0.5 : 1,
+                        fontFamily: 'Inter, sans-serif'
+                      }}
+                    >
+                      {isLoading ? 'Uploading...' : 'Upload'}
+                    </button>
+                  </>
                 ) : ('')}
-          
               </div>
             </div>
           </div>

@@ -1,3 +1,10 @@
+// API 基础配置
+const API_CONFIG = {
+  // 切换这两个地址来控制 API 访问
+  // BASE_URL: 'http://localhost:8080',
+  BASE_URL: 'http://192.168.50.113:8080',
+};
+
 const mockGraphData = {
   "edges": [
       {
@@ -57,8 +64,7 @@ const mockGraphData = {
 export const fetchGraphData = async () => {
   // return mockGraphData;
 
-  const apiUrl = 'http://localhost:8080/api/graph';
-
+  const apiUrl = `${API_CONFIG.BASE_URL}/api/graph`;
 
   try {
     const response = await fetch(apiUrl);
@@ -86,7 +92,7 @@ const mockNodeDetail = {
 export const fetchNodeDetail = async (nodeId) => {
   // return mockNodeDetail;
 
-  const apiUrl = `http://localhost:8080/api/node/${nodeId}`;
+  const apiUrl = `${API_CONFIG.BASE_URL}/api/node/${nodeId}`;
 
   try {
     const response = await fetch(apiUrl);
@@ -122,7 +128,7 @@ const mockRecommendation = [
 export const fetchRecommendation = async (nodeId) => {
   // return mockRecommendation;
 
-  const apiUrl = `http://localhost:8080/api/node/recommend?fromId=${nodeId}`;
+  const apiUrl = `${API_CONFIG.BASE_URL}/api/node/recommend?fromId=${nodeId}`;
 
   try {
     const response = await fetch(apiUrl);
@@ -141,7 +147,7 @@ export const fetchRecommendation = async (nodeId) => {
 };
 
 export const confirmNode = async (title, summary, fromId, newid) => {
-  const apiUrl = `http://localhost:8080/api/node/confirm`;
+  const apiUrl = `${API_CONFIG.BASE_URL}/api/node/confirm`;
 
   try {
     const data = {
@@ -171,11 +177,10 @@ export const confirmNode = async (title, summary, fromId, newid) => {
   }
 };
 
-
 export const upload = async (formData) => {
   // return mockRecommendation;
 
-  const apiUrl = `http://localhost:8080/api/agent/upload`;
+  const apiUrl = `${API_CONFIG.BASE_URL}/api/agent/upload`;
 
   try {
     const response = await fetch(apiUrl, {

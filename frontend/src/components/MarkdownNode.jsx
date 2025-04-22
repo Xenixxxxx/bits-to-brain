@@ -4,41 +4,61 @@ import { Handle, Position } from 'reactflow';
 
 export const MarkdownNode = ({ data }) => {
   return (
-    <div style={{
-      padding: '10px',
-      borderRadius: '5px',
-      width: '200px',
-      fontSize: '12px',
-      color: '#333',
-      textAlign: 'center',
-      border: '2px solid #3b82f6',
-      backgroundColor: '#f8fafc',
-      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-      transition: 'all 0.2s ease-in-out',
-      cursor: 'pointer',
-      ':hover': {
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-        transform: 'translateY(-2px)'
-      }
-    }}>
+    <div
+      style={{
+        padding: '10px',
+        borderRadius: '50%',  // 改为圆形
+        backgroundColor: 'rgb(248,234,212)',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        fontFamily: 'Inter, sans-serif',
+        position: 'relative',
+        width: '120px',  // 调整宽度
+        height: '120px',  // 添加高度
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center'
+      }}
+    >
       <Handle
         type="target"
         position={Position.Top}
-        style={{ width: '8px', height: '8px', background: '#3b82f6' }}
+        style={{
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'transparent', // 可隐藏视觉
+          width: 10,
+          height: 10,
+          borderRadius: '0%',
+          pointerEvents: 'none',
+          display: 'none'
+        }}
+        isConnectable={true}
+        id="target"
       />
       <div style={{
-        fontWeight: 'bold',
-        marginBottom: '8px',
-        color: '#1e40af'
+        fontSize: '14px',
+        fontWeight: '500',
+        marginBottom: '5px',
+        color: 'rgb(61,60,61)',
+        fontFamily: 'Inter, sans-serif',
+        maxWidth: '100px',  // 限制文本宽度
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }}>
         {data.label}
       </div>
       <div style={{
-        fontSize: '11px',
-        color: '#4b5563',
-        maxHeight: '60px',
+        fontSize: '12px',
+        color: 'rgb(61,60,61)',
+        fontFamily: 'Inter, sans-serif',
+        maxWidth: '100px',  // 限制文本宽度
         overflow: 'hidden',
-        textOverflow: 'ellipsis'
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
       }}>
         {/* <ReactMarkdown>
           {data.content}
@@ -46,8 +66,20 @@ export const MarkdownNode = ({ data }) => {
       </div>
       <Handle
         type="source"
-        position={Position.Bottom}
-        style={{ width: '8px', height: '8px', background: '#3b82f6' }}
+        position={Position.Top}
+        style={{
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'transparent', // 可隐藏视觉
+          width: 10,
+          height: 10,
+          borderRadius: '0%',
+          pointerEvents: 'none',
+          display: 'none'
+        }}
+        isConnectable={true}
+        id="source"
       />
     </div>
   );

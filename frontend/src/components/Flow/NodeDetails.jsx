@@ -117,7 +117,8 @@ export const NodeDetails = ({
         display: 'flex',
         flexDirection: 'column',
         border: '1px solid #e5e7eb',
-        transform: 'translate(-50%, -100%)', // 水平居中，向上偏移
+        transform: 'translate(-50%, -100%)',
+        fontFamily: 'Inter, sans-serif'
       }}
     >
       <div style={{
@@ -129,17 +130,19 @@ export const NodeDetails = ({
         borderBottom: '1px solid #e5e7eb',
         flexShrink: 0
       }}>
-        <h3 style={{ 
+        {/* <h3 style={{ 
           margin: 0, 
           fontSize: '1.25rem', 
           fontWeight: '600',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          maxWidth: '450px'
+          maxWidth: '450px',
+          fontFamily: 'Inter, sans-serif',
+          color: 'rgb(61,60,61)'
         }}>
           {selectedNode.data.label}
-        </h3>
+        </h3> */}
         <button 
           onClick={onClose}
           style={{
@@ -147,8 +150,9 @@ export const NodeDetails = ({
             border: 'none',
             cursor: 'pointer',
             fontSize: '1.25rem',
-            color: '#6b7280',
-            padding: '0 4px'
+            color: 'rgb(61,60,61)',
+            padding: '0 4px',
+            fontFamily: 'Inter, sans-serif'
           }}
         >
           ×
@@ -161,7 +165,8 @@ export const NodeDetails = ({
         marginBottom: '12px',
         fontSize: '0.875rem',
         lineHeight: '1.5',
-        color: '#4b5563',
+        color: 'rgb(61,60,61)',
+        fontFamily: 'Inter, sans-serif'
       }}>
         <ReactMarkdown>
           {content}
@@ -177,8 +182,8 @@ export const NodeDetails = ({
         {hasRecommendations && (
           <button
             onClick={async () => {
-              await onConfirm(selectedNode.id);
               onClose();
+              await onConfirm(selectedNode.id);
             }}
             style={{
               padding: '6px 12px',
@@ -189,7 +194,8 @@ export const NodeDetails = ({
               cursor: 'pointer',
               fontSize: '0.875rem',
               fontWeight: '500',
-              width: '100%'
+              width: '100%',
+              fontFamily: 'Inter, sans-serif'
             }}
           >
             Confirm
