@@ -25,7 +25,8 @@ export const ChatDialog = () => {
     setIsLoading(true);
 
     try {
-      const response = await sendMessage(input);
+      const sessionId = sessionStorage.getItem('sessionId');
+      const response = await sendMessage(input, { sessionId });
       
       // Handle different response formats
       if (response.buttons) {
@@ -74,7 +75,8 @@ export const ChatDialog = () => {
     setIsLoading(true);
 
     try {
-      const response = await sendMessage(button.value || button.label);
+      const sessionId = sessionStorage.getItem('sessionId');
+      const response = await sendMessage(button.value || button.label, { sessionId });
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: response.content,
@@ -107,7 +109,7 @@ export const ChatDialog = () => {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      backgroundColor: '#2c42bf'
+      backgroundColor: '#2d334a'
     }}>
       {/* Messages Container */}
       <div style={{
@@ -133,8 +135,9 @@ export const ChatDialog = () => {
               style={{
                 padding: '0.75rem 1rem',
                 borderRadius: '0.75rem',
-                backgroundColor: message.role === 'user' ? '#3b82f6' : '#f3f4f6',
-                color: message.role === 'user' ? 'white' : '#1f2937',
+                backgroundColor: message.role === 'user' ? '#e3f6f5' : '#bae8e8',
+                color: message.role === 'user' ? '#2d334a' : '#272343',
+                fontFamily: 'Inter, sans-serif',
                 maxWidth: '85%',
                 wordBreak: 'break-word'
               }}
@@ -282,7 +285,7 @@ export const ChatDialog = () => {
             disabled={isLoading || !input.trim()}
             style={{
               padding: '0.75rem 1rem',
-              backgroundColor: isLoading || !input.trim() ? '#d1d5db' : '#3b82f6',
+              backgroundColor: isLoading || !input.trim() ? '#d1d5db' : '#272343',
               color: 'white',
               border: 'none',
               borderRadius: '0.5rem',

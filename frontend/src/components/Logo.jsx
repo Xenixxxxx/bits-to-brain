@@ -5,7 +5,7 @@ export const Logo = () => {
     <div style={{
       width: '100%',
       height: '60px',
-      backgroundColor: 'rgb(61,60,61)',
+      backgroundColor: '#e3f6f5',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
@@ -21,13 +21,13 @@ export const Logo = () => {
           style={{
             width: '32px',
             height: '32px',
-            filter: 'invert(1)'
+            // filter: 'invert(1)'
           }}
         />
         <span style={{
           fontSize: '1.25rem',
           fontWeight: '600',
-          color: 'rgb(248,234,212)',
+          color: '#272343',
           fontFamily: 'Inter, sans-serif'
         }}>
           Bits to Brain

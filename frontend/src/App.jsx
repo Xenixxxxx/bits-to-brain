@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Flow } from './components/Flow/Flow';
 import { ChatDialog } from './components/ChatDialog';
 import { Logo } from './components/Logo';
+import { v4 as uuidv4 } from 'uuid';
 
 function App() {
+  useEffect(() => {
+    // 生成新的 sessionId 并存储
+    const sessionId = uuidv4();
+    sessionStorage.setItem('sessionId', sessionId);
+  }, []);
+
   return (
     <div style={{ 
       display: 'flex', 

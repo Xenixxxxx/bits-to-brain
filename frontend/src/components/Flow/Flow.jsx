@@ -116,7 +116,7 @@ const FlowInner = () => {
             label: node.title,
             content: node.title,
             isRecommendation: false,
-            size: Math.random() * 80 + 40  // 随机生成 80-120 之间的大小
+            size: Math.random() * 40 + 80  // 随机生成 80-120 之间的大小
           }
         }));
 
@@ -375,7 +375,7 @@ const FlowInner = () => {
         onInit={(instance) => {
           reactFlowInstance.setViewport({ x: 0, y: 0, zoom: 1 });
         }}
-        style={{ backgroundColor: 'rgb(13,13,13)' }}
+        style={{ backgroundColor: '#fffffe' }}
         defaultEdgeOptions={{
           type: 'straight',
           animated: false,

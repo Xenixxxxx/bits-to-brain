@@ -65,8 +65,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
           disabled={isLoading}
           style={{
             padding: '8px 16px',
-            backgroundColor: 'rgb(248,234,212)',
-            color: 'rgb(61,60,61)',
+            backgroundColor: '#272343',
+            color: '#fffffe',
             border: 'none',
             borderRadius: '8px',
             cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -84,7 +84,7 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
             style={{
               width: '20px',
               height: '20px',
-              filter: 'invert(0.2)'
+              filter: 'invert(1)'
             }}
           />
           Upload
@@ -282,7 +282,7 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
                       style={{
                         padding: '8px 16px',
                         backgroundColor: 'rgb(61,60,61)',
-                        color: 'rgb(248,234,212)',
+                        color: '#272343',
                         border: 'none',
                         borderRadius: '6px',
                         cursor: isLoading || (selectedOption === 'text' && !textInput.trim()) || (selectedOption === 'file' && !file) ? 'not-allowed' : 'pointer',
