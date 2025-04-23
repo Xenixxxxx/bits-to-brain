@@ -69,6 +69,7 @@ class UrlParser implements Parser {
             Instant t4 = Instant.now();
 
             log.info("[urlParser] LLM response completed in {} ms", Duration.between(t3, t4).toMillis());
+            log.info("[urlParser] LLM response: {}", result);
 
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> parsed = mapper.readValue(result, new TypeReference<>() {});
