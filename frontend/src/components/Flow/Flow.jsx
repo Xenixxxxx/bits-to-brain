@@ -375,7 +375,7 @@ const FlowInner = () => {
         onInit={(instance) => {
           reactFlowInstance.setViewport({ x: 0, y: 0, zoom: 1 });
         }}
-        style={{ backgroundColor: 'transparent' }}
+        style={{ backgroundColor: 'rgb(13,13,13)' }}
         defaultEdgeOptions={{
           type: 'straight',
           animated: false,
@@ -392,7 +392,7 @@ const FlowInner = () => {
         maxZoom={4}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
       >
-        <VantaBackground />
+        {/* <VantaBackground /> */}
         {/* <Controls /> */}
         {/* <MiniMap /> */}
         {selectedNode && (
