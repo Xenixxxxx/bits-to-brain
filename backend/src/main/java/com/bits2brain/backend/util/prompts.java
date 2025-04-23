@@ -7,7 +7,7 @@ public class prompts {
             Given the content below, extract the following structured information:
             
             1. "title" — A concise, **specific** title (within 5 words) that clearly identifies the **main topic or entity**, suitable as a knowledge graph node. Avoid generic words like "Overview", "Summary", "Understanding", "Introduction", etc.
-            2. "summary" — A **structured summary using Markdown**, including headings and bullet points where appropriate. About 3–6 paragraphs.
+            2. "summary" — A **structured summary using Markdown**, including headings and bullet points where appropriate. About 3–5 paragraphs.
             
             Return ONLY a valid raw **JSON** object. DO NOT include any code block markers (like ```json) or additional explanations.
             
@@ -28,7 +28,7 @@ public class prompts {
             
             1. "title" — A concise and specific title (maximum 5 words) that captures the **core subject or entity** discussed in the video. Avoid vague terms like "Overview", "Summary", "Understanding" or "Discussion".
             
-            2. "summary" — A well-organized **Markdown summary** of the key points discussed in the video. Use appropriate section headings and bullet points. Try to convert informal spoken language into **clear, structured insights**. The summary should be 3–6 paragraphs long.
+            2. "summary" — A well-organized **Markdown summary** of the key points discussed in the video. Use appropriate section headings and bullet points. Try to convert informal spoken language into **clear, structured insights**. The summary should be 3–5 paragraphs long.
             
             Assume the transcript may contain some repetition or disfluency. Focus on **meaningful content**, not filler words.
             

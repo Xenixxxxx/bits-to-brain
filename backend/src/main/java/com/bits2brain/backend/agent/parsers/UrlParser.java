@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.bits2brain.backend.util.Const.URL_PARSER_NAME;
@@ -73,7 +74,11 @@ class UrlParser implements Parser {
 
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> parsed = mapper.readValue(result, new TypeReference<>() {});
-            parsed.put("source", "urlParser");
+            parsed.put("source", URL_PARSER_NAME);
+            Map<String, String> extra = new HashMap<>();
+            extra.put("url", url);
+            parsed.put("extra", extra);
+
             parsed.put("timing", Map.of(
                     "fetchTimeMs", Duration.between(t1, t2).toMillis(),
                     "llmTimeMs", Duration.between(t3, t4).toMillis()

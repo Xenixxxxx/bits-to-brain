@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -95,11 +96,14 @@ public class VideoParser implements Parser {
 
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> parsed = mapper.readValue(result, Map.class);
-            parsed.put("source", "videoParser");
+            parsed.put("source", VIDEO_PARSER_NAME);
             parsed.put("timing", Map.of(
                     "uploadAndProcessMs", Duration.between(t1, t2).toMillis(),
                     "llmTimeMs", Duration.between(t3, t4).toMillis()
             ));
+            Map<String, String> extra = new HashMap<>();
+            extra.put("video_id", videoId);
+            parsed.put("extra", extra);
 
             knowledgeService.saveFromParsedResult(parsed);
             return parsed;

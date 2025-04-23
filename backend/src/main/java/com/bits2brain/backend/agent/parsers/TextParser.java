@@ -48,7 +48,7 @@ public class TextParser implements Parser {
             Map<String, Object> parsed = mapper.readValue(result, new TypeReference<>() {
             });
 
-            parsed.put("type", "text"); // add type metadata
+            parsed.put("source", TEXT_PARSER_NAME); // add type metadata
 
             log.info("[parseTextTool] Parsed result: {}", parsed);
             knowledgeService.saveFromParsedResult(parsed);

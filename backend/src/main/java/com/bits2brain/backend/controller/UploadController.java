@@ -37,20 +37,13 @@ public class UploadController {
             if (contentType == null) {
                 return ResponseEntity.badRequest().body("Unsupported file type.");
             }
-
+            // TODO: implement it
             if (contentType.startsWith("image/")) {
-                byte[] imageBytes = file.getBytes();
-                String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-                inputContent = "data:" + contentType + ";base64," + base64Image;
-                parserName = "parseImageTool";
+                return ResponseEntity.badRequest().body("Unsupported file type: " + contentType);
 
             } else if (contentType.startsWith("video/")) {
                 inputMap.put("file", file);
                 parserName = VIDEO_PARSER_NAME;
-
-            } else if (contentType.equals("text/plain") || contentType.equals("application/pdf")) {
-                inputContent = new String(file.getBytes());
-                parserName = "parseTextTool";
             } else {
                 return ResponseEntity.badRequest().body("Unsupported file type: " + contentType);
             }

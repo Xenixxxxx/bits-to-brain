@@ -18,10 +18,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.UUID;
 
+import static com.bits2brain.backend.util.Const.YOUTUBE_PARSER_NAME;
 import static com.bits2brain.backend.util.prompts.SUBTITLE_EXTRACT;
 
 @Slf4j
@@ -39,7 +41,7 @@ public class YoutubeVideoParser implements Parser {
 
     @Override
     public String getName() {
-        return "youtubeVideoParser";
+        return YOUTUBE_PARSER_NAME;
     }
 
     @Override
@@ -105,11 +107,16 @@ public class YoutubeVideoParser implements Parser {
             String result = chatModel.chat(prompt);
             Instant t4 = Instant.now();
             log.info("[YoutubeVideoParser] LLM response completed in {} ms", Duration.between(t3, t4).toMillis());
+            log.info("[YoutubeVideoParser] LLM response: {}", result);
 
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> parsed = mapper.readValue(result, new TypeReference<>() {
             });
-            parsed.put("source", "youtubeVideoParser");
+            parsed.put("source", YOUTUBE_PARSER_NAME);
+            Map<String, String> extra = new HashMap<>();
+            extra.put("url", url);
+            parsed.put("extra", extra);
+
             parsed.put("timing", Map.of(
                     "downloadMs", Duration.between(t1, t2).toMillis(),
                     "llmTimeMs", Duration.between(t3, t4).toMillis()

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,18 +54,29 @@ public class KnowledgeService {
     public void saveFromParsedResult(Map<String, Object> parsed) {
         String title = (String) parsed.getOrDefault("title", "Untitled");
         String summary = (String) parsed.getOrDefault("summary", "");
-        String type = (String) parsed.getOrDefault("type", "unknown");
+        String source = (String) parsed.getOrDefault("source", "unknown");
         String createdAt = Instant.now().toString();
         String uuid = (String) parsed.getOrDefault("uuid", UUID.randomUUID().toString());
-        if (uuid.isBlank()){
+        if (uuid.isBlank()) {
             uuid = UUID.randomUUID().toString();
         }
 
         Metadata metadata = new Metadata();
         metadata.put("uuid", uuid);
         metadata.put("title", title);
-        metadata.put("type", type);
+        metadata.put("source", source);
         metadata.put("createdAt", createdAt);
+        try {
+            if (parsed.containsKey("extra")) {
+                ObjectMapper mapper = new ObjectMapper();
+                String extraJson = mapper.writeValueAsString(parsed.get("extra"));
+                metadata.put("extra", extraJson);
+            }
+        } catch (Exception e) {
+            log.error("[KnowledgeService] Failed to parse extra metadata", e);
+        }
+
+        metadata.put("xx", 7);
 
         TextSegment textSegment = new TextSegment(summary, metadata);
         log.info("[KnowledgeService] Saving text segment: {}, Metadata: {}", textSegment, metadata);
@@ -230,7 +242,7 @@ public class KnowledgeService {
         Map<String, Object> parsedResult = Map.of(
                 "title", title,
                 "summary", fullText,
-                "type", "generated",
+                "source", "generated",
                 "uuid", newId
         );
 
