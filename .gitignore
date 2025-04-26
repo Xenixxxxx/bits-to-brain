@@ -46,3 +46,6 @@ desktop.ini
 *.bak
 *.old
 docker-compose.override.yml
+
+neo4j/
+*.vtt
