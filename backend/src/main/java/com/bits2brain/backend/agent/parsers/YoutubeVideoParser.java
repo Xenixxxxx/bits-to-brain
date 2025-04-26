@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.UUID;
@@ -113,8 +114,8 @@ public class YoutubeVideoParser implements Parser {
             Map<String, Object> parsed = mapper.readValue(result, new TypeReference<>() {
             });
             parsed.put("source", YOUTUBE_PARSER_NAME);
-            Map<String, String> extra = new HashMap<>();
-            extra.put("url", url);
+            Map<String, Object> extra = new HashMap<>();
+            extra.put("youtube_urls", List.of(url));
             parsed.put("extra", extra);
 
             parsed.put("timing", Map.of(
@@ -123,7 +124,7 @@ public class YoutubeVideoParser implements Parser {
             ));
 
             log.info("[YoutubeVideoParser] Parsed result: {}", parsed);
-            knowledgeService.saveFromParsedResult(parsed);
+            knowledgeService.saveFromParsedResult(parsed, true);
             if (!subtitleFile.delete()) {
                 log.warn("[YoutubeVideoParser] Failed to delete temporary file: {}", subtitleFile.getName());
             }

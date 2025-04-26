@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.bits2brain.backend.util.Const.URL_PARSER_NAME;
@@ -73,10 +74,11 @@ class UrlParser implements Parser {
             log.info("[urlParser] LLM response: {}", result);
 
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> parsed = mapper.readValue(result, new TypeReference<>() {});
+            Map<String, Object> parsed = mapper.readValue(result, new TypeReference<>() {
+            });
             parsed.put("source", URL_PARSER_NAME);
-            Map<String, String> extra = new HashMap<>();
-            extra.put("url", url);
+            Map<String, Object> extra = new HashMap<>();
+            extra.put("website_urls", List.of(url));
             parsed.put("extra", extra);
 
             parsed.put("timing", Map.of(
@@ -85,7 +87,7 @@ class UrlParser implements Parser {
             ));
 
             log.info("[urlParser] Parsed result: {}", parsed);
-            knowledgeService.saveFromParsedResult(parsed);
+            knowledgeService.saveFromParsedResult(parsed, true);
             return parsed;
         } catch (Exception e) {
             log.error("[urlParser] Chat model processing failed", e);

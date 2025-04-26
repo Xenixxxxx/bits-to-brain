@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import static com.bits2brain.backend.util.Const.MAX_MERGE_COUNT;
+
+
 @Slf4j
 @RestController
 @RequestMapping("/api/node")
@@ -56,8 +59,6 @@ public class NodeController {
         return ResponseEntity.ok("Saved and linked");
     }
 
-
-
     @GetMapping("/video/embed-url")
     public Map<String, Object> getEmbedUrl(@RequestParam String videoId) {
         try {
@@ -68,4 +69,24 @@ public class NodeController {
             return Map.of("error", "Failed to generate embed URL", "details", e.getMessage());
         }
     }
+
+    @PostMapping("/merge")
+    public ResponseEntity<?> mergeNodes(@RequestBody List<String> nodeIds) {
+        try {
+            if (nodeIds == null || nodeIds.size() < 2) {
+                return ResponseEntity.badRequest().body("Please provide at least 2 nodes to merge.");
+            }
+            if (nodeIds.size() > MAX_MERGE_COUNT) {
+                return ResponseEntity.badRequest().body("Too many nodes to merge. Max allowed: " + MAX_MERGE_COUNT);
+            }
+
+            Map<String, Object> result = knowledgeService.mergeNodes(nodeIds);
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("[NodeController] mergeNodes error: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Merging failed: " + e.getMessage());
+        }
+    }
+
 }

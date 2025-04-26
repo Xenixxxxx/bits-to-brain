@@ -97,28 +97,29 @@ public class ChatTools {
     public List<Map<String, String>> recommendNodesTool(String topic) {
         log.info("[RecommendNodesTool] Recommending nodes for topic: {}", topic);
         String prompt = String.format("""
-            You are a smart assistant helping to expand a knowledge graph.
-
-            The user wants to learn about: "%s"
-
-            Please recommend 3 distinct knowledge nodes that are relevant to this topic.
-            For each recommended node, include:
-            - A concise title (5 words max)
-            - A short summary (1-2 sentences)
-
-            Return ONLY a valid **raw JSON array** object. DO NOT include ```json or ``` or any explanation text. Format:
-            [
-              {"title": "Node Title A", "summary": "A short summary of A..."},
-              {"title": "Node Title B", "summary": "A short summary of B..."},
-              {"title": "Node Title C", "summary": "A short summary of C..."}
-            ]
-        """, topic);
+                    You are a smart assistant helping to expand a knowledge graph.
+                
+                    The user wants to learn about: "%s"
+                
+                    Please recommend 3 distinct knowledge nodes that are relevant to this topic.
+                    For each recommended node, include:
+                    - A concise title (5 words max)
+                    - A short summary (1-2 sentences)
+                
+                    Return ONLY a valid **raw JSON array** object. DO NOT include ```json or ``` or any explanation text. Format:
+                    [
+                      {"title": "Node Title A", "summary": "A short summary of A..."},
+                      {"title": "Node Title B", "summary": "A short summary of B..."},
+                      {"title": "Node Title C", "summary": "A short summary of C..."}
+                    ]
+                """, topic);
 
         try {
             String result = chatModel.chat(prompt);
             log.info("[RecommendNodesTool] Raw result:\n{}", result);
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(result, new TypeReference<>() {});
+            return mapper.readValue(result, new TypeReference<>() {
+            });
         } catch (Exception e) {
             log.warn("[RecommendNodesTool] Failed to parse recommendation result", e);
             return List.of(Map.of("error", "Failed to parse result", "raw", e.getMessage()));
@@ -138,7 +139,7 @@ public class ChatTools {
                     "summary", fullText,
                     "type", "generated"
             );
-            knowledgeService.saveFromParsedResult(parsedResult);
+            knowledgeService.saveFromParsedResult(parsedResult, true);
             log.info("[ConfirmRecommendationTool] Node saved successfully for title: {}", title);
             return Map.of("status", "success", "message", "Node saved successfully");
         } catch (Exception e) {

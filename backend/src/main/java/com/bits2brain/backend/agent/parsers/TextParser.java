@@ -51,7 +51,7 @@ public class TextParser implements Parser {
             parsed.put("source", TEXT_PARSER_NAME); // add type metadata
 
             log.info("[parseTextTool] Parsed result: {}", parsed);
-            knowledgeService.saveFromParsedResult(parsed);
+            knowledgeService.saveFromParsedResult(parsed, true);
             return parsed;
         } catch (Exception e) {
             log.error("[parseTextTool] Error processing chat model: {}", e.getMessage(), e);

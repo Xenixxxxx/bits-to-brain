@@ -101,11 +101,11 @@ public class VideoParser implements Parser {
                     "uploadAndProcessMs", Duration.between(t1, t2).toMillis(),
                     "llmTimeMs", Duration.between(t3, t4).toMillis()
             ));
-            Map<String, String> extra = new HashMap<>();
-            extra.put("video_id", videoId);
+            Map<String, Object> extra = new HashMap<>();
+            extra.put("video_ids", List.of(videoId));
             parsed.put("extra", extra);
 
-            knowledgeService.saveFromParsedResult(parsed);
+            knowledgeService.saveFromParsedResult(parsed, true);
             return parsed;
 
         } catch (Exception e) {

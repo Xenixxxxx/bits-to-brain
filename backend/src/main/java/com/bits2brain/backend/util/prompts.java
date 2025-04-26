@@ -52,5 +52,25 @@ public class prompts {
             Title: %s
             Summary: %s
             """;
+
+    public static final String MERGE_KNOWLEDGE = """
+            You are a knowledge consolidation assistant.
+            
+            Given the combined content below, which includes multiple **similar or related knowledge points**, your task is to synthesize them into a single structured representation:
+            
+            1. "title" — A concise, **specific** title (within 5 words) that clearly identifies the **main topic or entity**, suitable as a knowledge graph node. Avoid generic words like "Overview", "Summary", "Understanding", "Introduction", etc.
+            2. "summary" — A **structured summary using Markdown**, including headings and bullet points where appropriate. About 3–5 paragraphs.
+            
+            Return ONLY a valid raw **JSON** object. DO NOT include any code block markers (like ```json) or additional explanations.
+            
+            Format:
+            {
+              "title": "Concise and meaningful title",
+              "summary": "## Key Concepts\\n\\n- ...\\n- ...\\n\\n### Details\\n\\n- ..."
+            }
+            
+            Content:
+            
+            """;
 }
 
