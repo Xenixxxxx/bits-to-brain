@@ -71,7 +71,7 @@ public class AzureVideoIndexerClient {
     public void waitForProcessing(String videoId) throws InterruptedException {
         while (true) {
             String state = getProcessingState(videoId);
-            log.info("[AzureVideoIndexer] Processing state: {}", state);
+            log.info("[AzureVideoIndexer] Video {} Processing state: {}", videoId, state);
 
             if ("Processed".equalsIgnoreCase(state)) return;
             else if ("Failed".equalsIgnoreCase(state)) throw new RuntimeException("Video processing failed");

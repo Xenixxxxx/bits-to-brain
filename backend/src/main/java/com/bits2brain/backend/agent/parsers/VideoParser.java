@@ -2,6 +2,7 @@ package com.bits2brain.backend.agent.parsers;
 
 import com.bits2brain.backend.config.AzureVideoIndexerClient;
 import com.bits2brain.backend.service.KnowledgeService;
+import com.bits2brain.backend.util.FileUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static com.bits2brain.backend.util.Const.VIDEO_PARSER_NAME;
 import static com.bits2brain.backend.util.prompts.SUBTITLE_EXTRACT;
@@ -42,7 +44,6 @@ public class VideoParser implements Parser {
         return VIDEO_PARSER_NAME;
     }
 
-    // TODO: asynchronous processing
     @Override
     public Object run(Map<String, Object> input) {
         MultipartFile file = (MultipartFile) input.get("file");
@@ -51,66 +52,79 @@ public class VideoParser implements Parser {
         }
 
         try {
-            Instant t1 = Instant.now();
             String name = "upload_" + UUID.randomUUID();
             File localFile = File.createTempFile(name, ".mp4");
             try (FileOutputStream fos = new FileOutputStream(localFile)) {
                 fos.write(file.getBytes());
             }
 
+            // 1. Calculate MD5 to deduplicate
+            String md5 = FileUtils.calculateMD5(localFile);
+            if (FileUtils.isDuplicate(md5)) {
+                log.warn("[VideoParser] Duplicate video detected, skipping processing.");
+                return Map.of("message", "Duplicate video, skipping processing.");
+            }
+            FileUtils.saveMD5(md5);
+
             log.info("[VideoParser] Uploading video to Azure: {}", name);
             String videoId = azureClient.uploadVideo(name, localFile);
-            azureClient.waitForProcessing(videoId);
 
-            Map<String, Object> insights = azureClient.getInsights(videoId);
-            log.info("[VideoParser] Received insights: {}", insights.keySet());
+            // 2. Return immediately, and asynchronously process the rest
+            CompletableFuture.runAsync(() -> {
+                try {
+                    Instant t1 = Instant.now();
+                    azureClient.waitForProcessing(videoId);
 
-            // Extract transcript (simple approach)
-            List<Map<String, Object>> videos = (List<Map<String, Object>>) insights.get("videos");
-            if (videos == null || videos.isEmpty()) {
-                return Map.of("error", "No video insights available");
-            }
+                    Map<String, Object> insights = azureClient.getInsights(videoId);
+                    log.info("[VideoParser] Received insights: {}", insights.keySet());
 
-            Map<String, Object> insightsMap = (Map<String, Object>) videos.get(0).get("insights");
-            if (insightsMap == null || !insightsMap.containsKey("transcript")) {
-                return Map.of("error", "No transcript found in insights");
-            }
+                    List<Map<String, Object>> videos = (List<Map<String, Object>>) insights.get("videos");
+                    if (videos == null || videos.isEmpty()) {
+                        log.error("[VideoParser] No video insights available");
+                        return;
+                    }
 
-            List<Map<String, Object>> transcriptList = (List<Map<String, Object>>) insightsMap.get("transcript");
-            StringBuilder sb = new StringBuilder();
-            for (Map<String, Object> segment : transcriptList) {
-                String text = (String) segment.get("text");
-                if (text != null && !text.isBlank()) {
-                    sb.append(text).append(" ");
+                    Map<String, Object> insightsMap = (Map<String, Object>) videos.get(0).get("insights");
+                    if (insightsMap == null || !insightsMap.containsKey("transcript")) {
+                        log.error("[VideoParser] No transcript found in insights");
+                        return;
+                    }
+
+                    List<Map<String, Object>> transcriptList = (List<Map<String, Object>>) insightsMap.get("transcript");
+                    StringBuilder sb = new StringBuilder();
+                    for (Map<String, Object> segment : transcriptList) {
+                        String text = (String) segment.get("text");
+                        if (text != null && !text.isBlank()) {
+                            sb.append(text).append(" ");
+                        }
+                    }
+                    String transcript = sb.toString().trim();
+                    log.info("[VideoParser] Extracted transcript: {}", transcript);
+
+                    String prompt = SUBTITLE_EXTRACT + transcript;
+                    String result = chatModel.chat(prompt);
+
+                    ObjectMapper mapper = new ObjectMapper();
+                    Map<String, Object> parsed = mapper.readValue(result, Map.class);
+                    parsed.put("source", VIDEO_PARSER_NAME);
+                    parsed.put("extra", Map.of("video_ids", List.of(videoId)));
+
+                    log.info("[VideoParser] Processing time: {} ms", Duration.between(t1, Instant.now()).toMillis());
+
+                    knowledgeService.saveFromParsedResult(parsed, true);
+                    log.info("[VideoParser] Parsed result saved successfully");
+
+                } catch (Exception e) {
+                    log.error("[VideoParser] Async processing error: {}", e.getMessage(), e);
                 }
-            }
-            String transcript = sb.toString().trim();
+            });
 
-            Instant t2 = Instant.now();
-            log.info("[VideoParser] Extracted transcript :{}", transcript);
-
-            String prompt = SUBTITLE_EXTRACT + transcript;
-            Instant t3 = Instant.now();
-            String result = chatModel.chat(prompt);
-            Instant t4 = Instant.now();
-
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> parsed = mapper.readValue(result, Map.class);
-            parsed.put("source", VIDEO_PARSER_NAME);
-            parsed.put("timing", Map.of(
-                    "uploadAndProcessMs", Duration.between(t1, t2).toMillis(),
-                    "llmTimeMs", Duration.between(t3, t4).toMillis()
-            ));
-            Map<String, Object> extra = new HashMap<>();
-            extra.put("video_ids", List.of(videoId));
-            parsed.put("extra", extra);
-
-            knowledgeService.saveFromParsedResult(parsed, true);
-            return parsed;
+            return Map.of("videoId", videoId, "message", "Video uploaded. Processing asynchronously.");
 
         } catch (Exception e) {
             log.error("[VideoParser] Error: {}", e.getMessage(), e);
             return Map.of("error", "Processing failed", "details", e.getMessage());
         }
     }
+
 }
