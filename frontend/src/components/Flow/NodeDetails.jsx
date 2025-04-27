@@ -50,20 +50,38 @@ export const NodeDetails = ({
 
         if (nodeElement) {
           const nodeRect = nodeElement.getBoundingClientRect();
+          const detailsRect = detailsElement.getBoundingClientRect();
+          const windowWidth = window.innerWidth;
+          const windowHeight = window.innerHeight;
           
           const nodeScreenPosition = {
             x: node.position.x * viewport.zoom + viewport.x,
             y: node.position.y * viewport.zoom + viewport.y
           };
 
-          const bubblePosition = {
+          let bubblePosition = {
             x: nodeScreenPosition.x + (nodeRect.width * viewport.zoom) / 2,
             y: nodeScreenPosition.y - 10
           };
 
+          // 检查右边界
+          if (bubblePosition.x + detailsRect.width / 2 > windowWidth) {
+            bubblePosition.x = windowWidth - detailsRect.width / 2;
+          }
+          // 检查左边界
+          if (bubblePosition.x - detailsRect.width / 2 < 0) {
+            bubblePosition.x = detailsRect.width / 2;
+          }
+          // 检查上边界
+          if (bubblePosition.y - detailsRect.height < 0) {
+            bubblePosition.y = nodeScreenPosition.y + nodeRect.height * viewport.zoom + 10;
+            detailsElement.style.transform = 'translate(-50%, 0)';
+          } else {
+            detailsElement.style.transform = 'translate(-50%, -100%)';
+          }
+
           detailsElement.style.left = `${bubblePosition.x}px`;
           detailsElement.style.top = `${bubblePosition.y}px`;
-          detailsElement.style.transform = 'translate(-50%, -100%)';
         }
       }
     }
@@ -184,7 +202,8 @@ export const NodeDetails = ({
               padding: '4px 8px',
               borderRadius: '4px',
               backgroundColor: activeTab === 'video' ? '#e3f6f5' : 'transparent',
-              fontFamily: 'Inter, sans-serif'
+              fontFamily: 'Inter, sans-serif',
+              visibility: selectedNode.data?.isRecommendation ? 'hidden' : 'visible',
             }}
             onMouseEnter={(e) => {
               if (activeTab !== 'video') e.target.style.backgroundColor = 'rgba(108, 99, 255, 0.2)'
@@ -206,7 +225,8 @@ export const NodeDetails = ({
               padding: '4px 8px',
               borderRadius: '4px',
               backgroundColor: activeTab === 'other' ? '#e3f6f5' : 'transparent',
-              fontFamily: 'Inter, sans-serif'
+              fontFamily: 'Inter, sans-serif',
+              visibility: selectedNode.data?.isRecommendation ? 'hidden' : 'visible',
             }}
             onMouseEnter={(e) => {
               if (activeTab !== 'other') e.target.style.backgroundColor = 'rgba(108, 99, 255, 0.2)'
@@ -219,7 +239,7 @@ export const NodeDetails = ({
           </button>
           <button
             onClick={() => {
-              if (canRecommend) {
+              if (hasPendingRecommendations) {
                 handleCancelRecommend();
               } else {
                 setCanRecommend(true);
@@ -236,12 +256,13 @@ export const NodeDetails = ({
               transition: 'background-color 0.3s ease',
               marginLeft: '50%',
               marginRight: '10%',
-              color: canRecommend ? '#6C63FF' : '#6C63FF'
+              color: canRecommend ? '#6C63FF' : '#6C63FF',
+              visibility: selectedNode.data?.isRecommendation ? 'hidden' : 'visible',
             }}
             onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(108, 99, 255, 0.2)'}
             onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
           >
-            {canRecommend ? 'Cancel' : 'Recommend'}
+            {hasPendingRecommendations ? 'Cancel' : 'Discover'}
           </button>
         </div>
         <button 
@@ -393,11 +414,11 @@ export const NodeDetails = ({
           marginBottom: '12px',
           maxHeight: '250px'
         }}>
-          {selectedNode.detail.extra.website_urls ? selectedNode.detail.extra.website_urls.map(url => (
+          {selectedNode.detail && selectedNode.detail.extra.website_urls ? selectedNode.detail.extra.website_urls.map(url => (
             <a href={url} target="_blank" rel="noopener noreferrer">
               {url}
             </a>
-          )) : 'No website available'}
+          )) : ''}
         </div>
       )}
 

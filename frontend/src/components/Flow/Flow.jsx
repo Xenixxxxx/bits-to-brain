@@ -107,7 +107,7 @@ const FlowInner = () => {
             label: node.title,
             content: node.title,
             isRecommendation: false,
-            size: Math.random() * 40 + 80  
+            size: 80  
           }
         }));
 

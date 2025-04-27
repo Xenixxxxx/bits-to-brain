@@ -46,7 +46,8 @@ export const useNodeManagement = ({
               isRecommendation: true,
               sourceNodeId: selectedNode.id,
               title: rec.title,
-              summary: rec.summary
+              summary: rec.summary,
+              size: 80
             },
           };
         });
