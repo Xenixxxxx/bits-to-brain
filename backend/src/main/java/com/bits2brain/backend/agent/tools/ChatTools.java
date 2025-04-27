@@ -1,6 +1,7 @@
 package com.bits2brain.backend.agent.tools;
 
 import com.bits2brain.backend.service.KnowledgeService;
+import com.bits2brain.backend.util.SearchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
@@ -23,7 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.bits2brain.backend.util.Const.QUERY_SIMILARITY_THRESHOLD;
-import static com.bits2brain.backend.util.prompts.RECOMMEND_CONFIRM;
+import static com.bits2brain.backend.util.Prompts.RECOMMEND_CONFIRM;
 
 @Slf4j
 @Component
@@ -34,6 +35,7 @@ public class ChatTools {
     private final EmbeddingModel embeddingModel;
     private final EmbeddingStore<TextSegment> embeddingStore;
     private final ChatLanguageModel chatModel;
+    private final SearchHelper searchHelper;
 
     @Tool("Finds the most relevant knowledge node by semantic similarity to the input text")
     public Map<String, Object> findRelevantNode(@P("user input topic") String topic) {
@@ -71,7 +73,7 @@ public class ChatTools {
         }
     }
 
-    @Tool("Given a node uuid, returns its title, content(text)")
+    @Tool("Given a node uuid, query for details of the node.")
     public Map<String, Object> queryNodeByUuid(@P("uuid") String uuid) {
         log.info("[QueryNodeByUuidTool] Querying node with UUID: {}", uuid);
         try {
@@ -148,4 +150,34 @@ public class ChatTools {
         }
     }
 
+    @Tool("When the user wants to learn more about a given node title, find and suggest a relevant YouTube video as an additional resource.")
+    public Map<String, Object> recommendVideoTool(@P("title") String title) {
+        log.info("[RecommendVideoTool] Searching video for title: {}", title);
+        try {
+            String youtubeLink = searchHelper.searchYouTube(title);
+            if (youtubeLink == null || youtubeLink.isBlank()) {
+                return Map.of("status", "error", "message", "No video found");
+            }
+            return Map.of("status", "success", "youtubeLink", youtubeLink);
+        } catch (Exception e) {
+            log.error("[RecommendVideoTool] Failed to search video", e);
+            return Map.of("status", "error", "message", e.getMessage());
+        }
+    }
+
+
+    @Tool("Attach/save a given YouTube video link to an existing knowledge node by its UUID, enhancing the node with additional multimedia content.")
+    public Map<String, Object> attachVideoToNodeTool(@P("uuid") String uuid, @P("youtubeLink") String youtubeLink) {
+        log.info("[attachVideoToNodeTool] Processing node UUID: {}, youtubeLink: {}", uuid, youtubeLink);
+        try {
+            knowledgeService.addYoutubeUrlToNode(uuid, youtubeLink);
+
+            log.info("[attachVideoToNodeTool] Successfully added video {} to node {}", youtubeLink, uuid);
+            return Map.of("status", "success", "youtubeLink", youtubeLink);
+
+        } catch (Exception e) {
+            log.error("[attachVideoToNodeTool] Failed to process", e);
+            return Map.of("status", "error", "message", e.getMessage());
+        }
+    }
 }

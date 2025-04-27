@@ -13,7 +13,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.Map;
 
 import static com.bits2brain.backend.util.Const.TEXT_PARSER_NAME;
-import static com.bits2brain.backend.util.prompts.TEXT_EXTRACT;
+import static com.bits2brain.backend.util.Prompts.TEXT_EXTRACT;
 
 @Slf4j
 @Component

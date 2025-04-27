@@ -21,8 +21,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static com.bits2brain.backend.util.Const.VIDEO_PARSER_NAME;
-import static com.bits2brain.backend.util.prompts.SUBTITLE_EXTRACT;
-import static com.bits2brain.backend.util.prompts.TEXT_EXTRACT;
+import static com.bits2brain.backend.util.Prompts.SUBTITLE_EXTRACT;
 
 @Slf4j
 @Component

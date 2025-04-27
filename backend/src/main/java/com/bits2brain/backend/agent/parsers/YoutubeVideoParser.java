@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import java.util.UUID;
 
 import static com.bits2brain.backend.util.Const.YOUTUBE_PARSER_NAME;
-import static com.bits2brain.backend.util.prompts.SUBTITLE_EXTRACT;
+import static com.bits2brain.backend.util.Prompts.SUBTITLE_EXTRACT;
 
 @Slf4j
 @Component

@@ -1,6 +1,6 @@
 package com.bits2brain.backend.util;
 
-public class prompts {
+public class Prompts {
     public static final String TEXT_EXTRACT = """
             You are a knowledge extraction assistant.
             
