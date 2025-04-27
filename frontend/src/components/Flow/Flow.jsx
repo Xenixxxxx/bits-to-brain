@@ -150,7 +150,6 @@ const FlowInner = () => {
         requestAnimationFrame(() => {
           setNodes(layoutedNodes);
           setEdges(layoutedEdges);
-          console.log('Setting edges:', layoutedEdges);
         });
       }
     } catch (error) {
@@ -224,7 +223,7 @@ const FlowInner = () => {
           );
         } else {
           // 显示错误提示
-          setToastMessage('Maximun 3 nodes can be selected for demo');
+          setToastMessage('Maximum 3 nodes can be selected for demo');
         }
       }
       return;
@@ -357,6 +356,11 @@ const FlowInner = () => {
     if (isPanMode && node) {
       setSelectedNode(node);
     }
+  };
+  window.clearRecommendations = () => {
+    setNodes(nds => nds.filter(n => !n.data.isRecommendation));
+    setRecommendationNodes([]);
+    setHasPendingRecommendations(false);
   };
 
   return (
@@ -505,7 +509,7 @@ const FlowInner = () => {
           }}
         >
           <img 
-            src="https://api.iconify.design/fluent:hand-24-filled.svg" 
+            src="https://api.iconify.design/fluent:hand-wave-24-regular.svg" 
             alt="Pan" 
             style={{
               width: '20px',
@@ -523,7 +527,7 @@ const FlowInner = () => {
           }}
         >
           <img 
-            src="https://api.iconify.design/fluent:select-all-24-filled.svg" 
+            src="https://api.iconify.design/fluent:select-all-24-regular.svg" 
             alt="Select" 
             style={{
               width: '20px',
@@ -545,12 +549,12 @@ const FlowInner = () => {
         onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
         fitView
-        nodesDraggable={!isPanMode}
+        nodesDraggable={isPanMode}
         nodesConnectable={!isPanMode}
         elementsSelectable={!isPanMode}
         selectionMode={SelectionMode.Full}
         panOnDrag={isPanMode}
-        panOnScroll={isPanMode}
+        // panOnScroll={isPanMode}
         zoomOnScroll={true}
         zoomOnDoubleClick={true}
         selectionOnDrag={!isPanMode}
@@ -580,15 +584,19 @@ const FlowInner = () => {
         {/* <Controls /> */}
         {/* <MiniMap /> */}
         {selectedNode && isPanMode && (
-          <NodeDetails
-            selectedNode={selectedNode}
-            onClose={() => setSelectedNode(null)}
-            onRecommend={handleRecommendation}
-            onConfirm={handleConfirmRecommendation}
-            hasRecommendations={selectedNode?.data?.isRecommendation}
-            hasPendingRecommendations={hasPendingRecommendations}
-            isLoading={isLoading}
-          />
+          <div>
+            <div style={{ pointerEvents: 'auto' }}>  {/* 恢复 NodeDetails 的点击事件 */}
+              <NodeDetails
+                selectedNode={selectedNode}
+                onClose={() => setSelectedNode(null)}
+                onRecommend={handleRecommendation}
+                onConfirm={handleConfirmRecommendation}
+                hasRecommendations={selectedNode?.data?.isRecommendation}
+                hasPendingRecommendations={hasPendingRecommendations}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
         )}
       </ReactFlow>
 

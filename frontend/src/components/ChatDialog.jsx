@@ -26,7 +26,11 @@ export const ChatDialog = () => {
 
     try {
       const sessionId = sessionStorage.getItem('sessionId');
-      const response = await sendMessage(input, { sessionId });
+      const selectedNode = window.getSelectedNode?.();
+      const response = await sendMessage(input, { 
+        sessionId,
+        selectedNodeId: selectedNode?.id
+      });
       
       // Handle different response formats
       if (response.buttons) {
@@ -76,7 +80,11 @@ export const ChatDialog = () => {
 
     try {
       const sessionId = sessionStorage.getItem('sessionId');
-      const response = await sendMessage(button.value || button.label, { sessionId });
+      const selectedNode = window.getSelectedNode?.();
+      const response = await sendMessage(button.value || button.label, { 
+        sessionId,
+        selectedNodeId: selectedNode?.id
+      });
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: response.content,

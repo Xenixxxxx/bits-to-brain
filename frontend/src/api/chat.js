@@ -9,7 +9,8 @@ export const sendMessage = async (message, options = {}) => {
       },
       body: JSON.stringify({
         message,
-        sessionId: options.sessionId
+        sessionId: options.sessionId,
+        uuid: options.selectedNodeId
       }),
     });
 
