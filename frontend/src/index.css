@@ -1,68 +1,133 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ReactFlow styles */
+.react-flow__container {
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+.react-flow {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
-body {
+.react-flow__renderer {
+  width: 100%;
+  height: 100%;
+}
+
+.react-flow__node {
+  @apply bg-white border-4 border-blue-200 rounded-xl p-5 min-w-[250px] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1;
+  z-index: 2;
+}
+
+.react-flow__node:hover {
+  @apply shadow-xl;
+}
+
+.react-flow__handle {
+  @apply bg-transparent w-0 h-0 border-0;
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.react-flow__edge {
+  @apply stroke-blue-400;
+  stroke-width: 3;
+  z-index: 1;
+}
+
+.react-flow__edge-path {
+  @apply stroke-blue-400;
+  stroke-width: 3;
+  z-index: 1;
+}
+
+.react-flow__edge-text {
+  @apply fill-blue-400;
+  font-size: 12px;
+}
+
+.react-flow__edge-textbg {
+  @apply fill-white;
+  font-size: 12px;
+}
+
+.react-flow__controls {
+  @apply bg-white border-2 border-gray-200 rounded-lg shadow-lg;
+}
+
+.react-flow__minimap {
+  @apply bg-white border-2 border-gray-200 rounded-lg shadow-lg;
+}
+
+/* Base styles */
+html, 
+body, 
+#root {
+  width: 100%;
+  height: 100%;
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  padding: 0;
+  box-sizing: border-box;
+  position: relative;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Markdown content styles */
+.markdown-content {
+  @apply text-sm leading-relaxed;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.markdown-content h1 {
+  @apply text-2xl font-bold text-gray-900 my-4;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.markdown-content h2 {
+  @apply text-xl font-bold text-gray-900 my-3;
+}
+
+.markdown-content h3 {
+  @apply text-lg font-bold text-gray-900 my-2;
+}
+
+.markdown-content p {
+  @apply text-gray-600 my-2;
+}
+
+.markdown-content ul, .markdown-content ol {
+  @apply text-gray-600 my-2 pl-5;
+}
+
+.markdown-content li {
+  @apply my-1;
+}
+
+.markdown-content code {
+  @apply bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-gray-800;
+}
+
+.markdown-content pre {
+  @apply bg-gray-100 p-3 rounded overflow-auto my-2;
+}
+
+.markdown-content pre code {
+  @apply bg-transparent p-0;
+}
+
+.markdown-content a {
+  @apply text-blue-500 hover:underline;
+}
+
+.markdown-content blockquote {
+  @apply border-l-4 border-gray-200 pl-3 my-2 text-gray-500;
 }
