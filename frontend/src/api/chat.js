@@ -1,4 +1,4 @@
-const CHAT_API_URL = 'http://localhost:8080/api/chat';
+const CHAT_API_URL = 'http://20.92.230.227:8080/api/chat';
 
 export const sendMessage = async (message, options = {}) => {
   try {

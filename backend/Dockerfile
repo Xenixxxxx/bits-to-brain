@@ -3,15 +3,19 @@ FROM openjdk:17-slim
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y wget ffmpeg python3 python3-pip && \
-    pip3 install yt-dlp && \
+    apt-get install -y --no-install-recommends wget ffmpeg ca-certificates && \
+    wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /usr/local/bin/yt-dlp && \
+    chmod +x /usr/local/bin/yt-dlp && \
     rm -rf /var/lib/apt/lists/*
 
-COPY target/app.jar app.jar
-COPY entrypoint.sh entrypoint.sh
+# Copy app.jar
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} app.jar
 
+# Copy entrypoint
+COPY entrypoint.sh entrypoint.sh
 RUN chmod +x entrypoint.sh
 
 VOLUME ["/app/data"]
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=file:/app/config/application.properties"]
