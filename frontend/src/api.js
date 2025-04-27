@@ -200,4 +200,30 @@ export const upload = async (formData) => {
   }
 };
 
+export const mergeNodes = async (nodeIds) => {
+  const apiUrl = `${API_CONFIG.BASE_URL}/api/node/merge`;
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(nodeIds)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText);
+    }
+
+    const data = await response.json();
+    console.log('From merge API:', data);
+    return data;
+  } catch (error) {
+    console.error('Error merging nodes:', error);
+    throw error;
+  }
+};
+
 

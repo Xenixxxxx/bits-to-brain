@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { upload } from '../../api';
 import { FaFileUpload, FaFileAlt } from 'react-icons/fa';
 
-export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
+export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNodes, mergeNodes }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [textInput, setTextInput] = useState('');
@@ -47,26 +47,62 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
   return (
     <div style={{
       position: 'absolute',
-      bottom: '20%',
+      bottom: '10%',
       width: '100%',
-      left: '50%',
+      height: '10%',
+      left: '0%',
       zIndex: 1000,
-      fontFamily: 'Inter, sans-serif'
+      fontFamily: 'Inter, sans-serif',
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '8px'
     }}>
-      <div style={{
-        display: 'flex',
-        gap: '8px'
-      }}>
+      <button
+        onClick={() => {
+          setShowOptions(true);
+          setSelectedOption(null);
+        }}
+        disabled={isLoading}
+        style={{
+          padding: '8px 16px',
+          backgroundColor: '#272343',
+          color: '#fffffe',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: isLoading ? 'not-allowed' : 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          opacity: isLoading ? 0.5 : 1,
+          fontFamily: 'Inter, sans-serif',
+          width: '200px'
+        }}
+      >
+        <img 
+          src="https://api.iconify.design/fluent:upload-24-filled.svg" 
+          alt="Upload" 
+          style={{
+            width: '20px',
+            height: '20px',
+            filter: 'invert(1)'
+          }}
+        />
+        Upload
+      </button>
+
+      {selectedNodes.length > 0 && (
         <button
           onClick={() => {
-            setShowOptions(true);
-            setSelectedOption(null);
+            // TODO: 实现合并功能
+            console.log('Selected nodes:', selectedNodes);
+            mergeNodes();
           }}
           disabled={isLoading}
           style={{
             padding: '8px 16px',
-            backgroundColor: '#272343',
-            color: '#fffffe',
+            backgroundColor: '#ffd803',
+            color: '#272343',
             border: 'none',
             borderRadius: '8px',
             cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -75,21 +111,22 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
             gap: '8px',
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
             opacity: isLoading ? 0.5 : 1,
-            fontFamily: 'Inter, sans-serif'
+            fontFamily: 'Inter, sans-serif',
+            width: '200px'
           }}
         >
           <img 
-            src="https://api.iconify.design/fluent:upload-24-filled.svg" 
-            alt="Upload" 
+            src="https://api.iconify.design/fluent:merge-24-filled.svg" 
+            alt="Merge" 
             style={{
               width: '20px',
               height: '20px',
-              filter: 'invert(1)'
+              filter: 'invert(0.2)'
             }}
           />
-          Upload
+          Merge
         </button>
-      </div>
+      )}
 
       {showOptions && (
         <div style={{

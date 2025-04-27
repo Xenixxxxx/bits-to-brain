@@ -8,7 +8,7 @@ export const NodeDetails = ({
   onRecommend, 
   onConfirm,
   hasRecommendations,
-  hasPendingRecommendations
+  hasPendingRecommendations,
 }) => {
   const detailsRef = useRef(null);
   const { getNode, getViewport } = useReactFlow();
@@ -130,19 +130,6 @@ export const NodeDetails = ({
         borderBottom: '1px solid #e5e7eb',
         flexShrink: 0
       }}>
-        {/* <h3 style={{ 
-          margin: 0, 
-          fontSize: '1.25rem', 
-          fontWeight: '600',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          maxWidth: '450px',
-          fontFamily: 'Inter, sans-serif',
-          color: 'rgb(61,60,61)'
-        }}>
-          {selectedNode.data.label}
-        </h3> */}
         <button 
           onClick={onClose}
           style={{

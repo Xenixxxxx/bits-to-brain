@@ -10,11 +10,19 @@ export const MarkdownNode = ({ data }) => {
       style={{
         padding: '2px',  // 减小内边距
         borderRadius: '12px',  // 改为圆角矩形
-        backgroundColor: isHovered ? '#ffd803' : '#bae8e8',
-        border: '0.2px solid #000000',  // 添加黑色边框
-        boxShadow: isHovered 
-          ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.1), 0 0 30px 10px rgba(255, 216, 3, 0.2), 0 0 60px 20px rgba(255, 216, 3, 0.1), 0 0 90px 30px rgba(255, 216, 3, 0.05)'
-          : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.1), 0 0 10px 5px rgba(230, 230, 230, 0.2), 0 0 20px 10px rgba(180, 180, 180, 0.1), 0 0 30px 15px rgba(143, 143, 143, 0.05)',
+        backgroundColor: data.isSelected 
+          ? '#ffd803' 
+          : isHovered 
+            ? '#ffd803' 
+            : '#bae8e8',
+        border: data.isSelected
+          ? '2px solid #272343'
+          : '0.2px solid #000000',
+        boxShadow: data.isSelected
+          ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 2px #272343, 0 0 30px 10px rgba(255, 216, 3, 0.2), 0 0 60px 20px rgba(255, 216, 3, 0.1), 0 0 90px 30px rgba(255, 216, 3, 0.05)'
+          : isHovered 
+            ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.1), 0 0 30px 10px rgba(255, 216, 3, 0.2), 0 0 60px 20px rgba(255, 216, 3, 0.1), 0 0 90px 30px rgba(255, 216, 3, 0.05)'
+            : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.1), 0 0 10px 5px rgba(230, 230, 230, 0.2), 0 0 20px 10px rgba(180, 180, 180, 0.1), 0 0 30px 15px rgba(143, 143, 143, 0.05)',
         fontFamily: 'Inter, sans-serif',
         position: 'relative',
         width: isHovered ? `${data.size * 2}px` : `${data.size * 1.5}px`,  // 增加宽度

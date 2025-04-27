@@ -7,16 +7,18 @@ import ReactFlow, {
   useEdgesState,
   addEdge,
   useReactFlow,
-  ReactFlowProvider
+  ReactFlowProvider,
+  SelectionMode
 } from 'reactflow';
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide } from 'd3-force';
 import 'reactflow/dist/style.css';
-import { fetchGraphData, fetchNodeDetail, fetchRecommendation, confirmNode } from '../../api';
+import { fetchGraphData, fetchNodeDetail, fetchRecommendation, confirmNode, mergeNodes as mergeNodesApi } from '../../api';
 import { MarkdownNode } from '../MarkdownNode';
 import { NodeDetails } from './NodeDetails';
 import { UploadBox } from './UploadBox';
 import { useNodeManagement } from '../../hooks/useNodeManagement';
 import { VantaBackground } from './VantaBackground';
+import { Toast } from '../Toast';
 
 const nodeTypes = {
   markdown: MarkdownNode,
@@ -87,10 +89,13 @@ const FlowInner = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [selectedNodes, setSelectedNodes] = useState([]);
+  const [isPanMode, setIsPanMode] = useState(true);  // 新增：控制拖拽模式
   const [hasPendingRecommendations, setHasPendingRecommendations] = useState(false);
   const [recommendationNodes, setRecommendationNodes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
   const previousDataRef = useRef(null);
   const reactFlowInstance = useReactFlow();
 
@@ -188,6 +193,43 @@ const FlowInner = () => {
   }, [edges]);
 
   const onNodeClick = useCallback(async (event, node) => {
+    if (!isPanMode) {
+      // 检查节点是否已经被选中
+      const isCurrentlySelected = selectedNodes.includes(node.id);
+      
+      if (isCurrentlySelected) {
+        // 如果节点已经被选中，则取消选中
+        setSelectedNodes(prev => prev.filter(id => id !== node.id));
+        setNodes(nds =>
+          nds.map(n => ({
+            ...n,
+            data: {
+              ...n.data,
+              isSelected: n.id === node.id ? false : n.data.isSelected
+            }
+          }))
+        );
+      } else {
+        // 如果节点未被选中，且当前选中的节点数量小于 3，则选中该节点
+        if (selectedNodes.length < 3) {
+          setSelectedNodes(prev => [...prev, node.id]);
+          setNodes(nds =>
+            nds.map(n => ({
+              ...n,
+              data: {
+                ...n.data,
+                isSelected: n.id === node.id ? true : n.data.isSelected
+              }
+            }))
+          );
+        } else {
+          // 显示错误提示
+          setToastMessage('Maximun 3 nodes can be selected for demo');
+        }
+      }
+      return;
+    }
+
     if (node.data.isRecommendation) {
       setSelectedNode(node);
       return;
@@ -202,7 +244,7 @@ const FlowInner = () => {
     } catch (error) {
       console.error('Error fetching node detail:', error);
     }
-  }, []);
+  }, [isPanMode, selectedNodes]);
 
   const onNodeDrag = useCallback((event, node) => {
     // 实时更新节点位置，但不触发边的重渲染
@@ -251,11 +293,68 @@ const FlowInner = () => {
     );
   }, [setNodes, setEdges]);
 
+  // 修改：在切换模式时清除选中状态
+  const handleModeChange = useCallback((isPan) => {
+    setIsPanMode(isPan);
+    setSelectedNode(null);
+    setSelectedNodes([]);
+    // 清除所有节点的选中状态
+    setNodes((nds) =>
+      nds.map((n) => ({
+        ...n,
+        data: {
+          ...n.data,
+          isSelected: false
+        }
+      }))
+    );
+  }, [setNodes]);
+
+  const mergeNodes = useCallback(async () => {
+    try {
+      const selectedNodes = nodes.filter(node => node.data.isSelected);
+      console.log('selectedNodes:', selectedNodes);
+      
+      if (selectedNodes.length < 2) {
+        setToastMessage('Please select at least 2 nodes to merge');
+        return;
+      }
+
+      if (selectedNodes.length > 3) {
+        setToastMessage('Too many nodes to merge. Max allowed: 3');
+        return;
+      }
+
+      const nodeIds = selectedNodes.map(node => node.id);
+      const result = await mergeNodesApi(nodeIds);
+      
+      // 刷新图表数据
+      await fetchData();
+      
+      // 清除选中状态
+      setSelectedNodes([]);
+      setNodes(nds =>
+        nds.map(n => ({
+          ...n,
+          data: {
+            ...n.data,
+            isSelected: false
+          }
+        }))
+      );
+
+      setToastMessage('Nodes merged successfully');
+    } catch (error) {
+      console.error('Error merging nodes:', error);
+      setToastMessage(error.message || 'Failed to merge nodes');
+    }
+  }, [nodes, fetchData]);
+
   // 导出刷新函数和节点选中状态管理函数
   window.refreshFlow = debouncedRefresh;
   window.getSelectedNode = () => selectedNode;
   window.setSelectedNode = (node) => {
-    if (node) {
+    if (isPanMode && node) {
       setSelectedNode(node);
     }
   };
@@ -355,10 +454,87 @@ const FlowInner = () => {
             z-index: 1000;
             transition: opacity 0.3s ease-in-out;
           }
+
+          .mode-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 8px;
+          }
+          .mode-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Inter, sans-serif';
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          }
+          .mode-button.active {
+            background-color: #272343;
+            color: #fffffe;
+          }
+          .mode-button:not(.active) {
+            background-color: #fffffe;
+            color: #272343;
+            border: 1px solid #272343;
+          }
+          @keyframes slideIn {
+            from {
+              transform: translate(-50%, -100%);
+              opacity: 0;
+            }
+            to {
+              transform: translate(-50%, 0);
+              opacity: 1;
+            }
+          }
         `}
       </style>
 
-        {/* Background rgb */}
+      <div className="mode-switch">
+        <button
+          className={`mode-button ${isPanMode ? 'active' : ''}`}
+          onClick={() => handleModeChange(true)}
+          style={{
+            opacity: isPanMode ? 1 : 0.7
+          }}
+        >
+          <img 
+            src="https://api.iconify.design/fluent:hand-24-filled.svg" 
+            alt="Pan" 
+            style={{
+              width: '20px',
+              height: '20px',
+              filter: isPanMode ? 'invert(1)' : 'invert(0.2)'
+            }}
+          />
+          Discover
+        </button>
+        <button
+          className={`mode-button ${!isPanMode ? 'active' : ''}`}
+          onClick={() => handleModeChange(false)}
+          style={{
+            opacity: !isPanMode ? 1 : 0.7
+          }}
+        >
+          <img 
+            src="https://api.iconify.design/fluent:select-all-24-filled.svg" 
+            alt="Select" 
+            style={{
+              width: '20px',
+              height: '20px',
+              filter: !isPanMode ? 'invert(1)' : 'invert(0.2)'
+            }}
+          />
+          Merge
+        </button>
+      </div>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -369,9 +545,20 @@ const FlowInner = () => {
         onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
         fitView
-        nodesDraggable={true}
-        nodesConnectable={true}
-        elementsSelectable={true}
+        nodesDraggable={!isPanMode}
+        nodesConnectable={!isPanMode}
+        elementsSelectable={!isPanMode}
+        selectionMode={SelectionMode.Full}
+        panOnDrag={isPanMode}
+        panOnScroll={isPanMode}
+        zoomOnScroll={true}
+        zoomOnDoubleClick={true}
+        selectionOnDrag={!isPanMode}
+        selectionKeyCode="Shift"
+        multiSelectionKeyCode="Shift"
+        nodesFocusable={!isPanMode}
+        edgesFocusable={false}
+        edgesUpdatable={false}
         onInit={(instance) => {
           reactFlowInstance.setViewport({ x: 0, y: 0, zoom: 1 });
         }}
@@ -385,9 +572,6 @@ const FlowInner = () => {
             zIndex: 1
           }
         }}
-        edgesFocusable={false}
-        edgesUpdatable={false}
-        nodesFocusable={false}
         minZoom={0.1}
         maxZoom={4}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
@@ -395,7 +579,7 @@ const FlowInner = () => {
         {/* <VantaBackground /> */}
         {/* <Controls /> */}
         {/* <MiniMap /> */}
-        {selectedNode && (
+        {selectedNode && isPanMode && (
           <NodeDetails
             selectedNode={selectedNode}
             onClose={() => setSelectedNode(null)}
@@ -412,7 +596,20 @@ const FlowInner = () => {
         <div className="loading-spinner" />
       </div>
 
-      <UploadBox onUploadSuccess={debouncedRefresh} isLoading={isLoading} setIsLoading={setIsLoading} />
+      <UploadBox 
+        onUploadSuccess={debouncedRefresh} 
+        isLoading={isLoading} 
+        setIsLoading={setIsLoading}
+        selectedNodes={selectedNodes}
+        mergeNodes={mergeNodes}
+      />
+
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
     </div>
   );
 };
