@@ -25,8 +25,8 @@ import dev.langchain4j.data.document.Metadata;
 
 import static com.bits2brain.backend.util.Const.LINK_SIMILARITY_THRESHOLD;
 import static com.bits2brain.backend.util.Const.MAX_MERGE_COUNT;
-import static com.bits2brain.backend.util.prompts.MERGE_KNOWLEDGE;
-import static com.bits2brain.backend.util.prompts.RECOMMEND_CONFIRM;
+import static com.bits2brain.backend.util.Prompts.MERGE_KNOWLEDGE;
+import static com.bits2brain.backend.util.Prompts.RECOMMEND_CONFIRM;
 
 @Slf4j
 @Service
@@ -296,5 +296,9 @@ public class KnowledgeService {
             return Map.of("error", "Node not found for UUID: " + uuid);
         }
         return node;
+    }
+
+    public void addYoutubeUrlToNode(String uuid, String youtubeLink) {
+        nodeMapper.addYoutubeUrlToNode(uuid, youtubeLink);
     }
 }

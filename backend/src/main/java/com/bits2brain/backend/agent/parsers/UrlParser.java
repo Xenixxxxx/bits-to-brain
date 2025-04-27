@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.bits2brain.backend.util.Const.URL_PARSER_NAME;
-import static com.bits2brain.backend.util.prompts.TEXT_EXTRACT;
+import static com.bits2brain.backend.util.Prompts.TEXT_EXTRACT;
 
 @Slf4j
 @Component

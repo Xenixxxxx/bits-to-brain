@@ -144,4 +144,18 @@ public class NodeMapper {
             createRelationship(newUuid, neighborUuid, 0.0);
         }
     }
+
+    public void addYoutubeUrlToNode(String uuid, String youtubeLink) {
+        neo4jClient.query("""
+        MATCH (n {uuid: $uuid})
+        WITH n, 
+             CASE WHEN n.extra IS NULL THEN { youtube_urls: [] } ELSE apoc.convert.fromJsonMap(n.extra) END AS extraMap
+        WITH n, apoc.map.setKey(extraMap, 'youtube_urls', coalesce(extraMap.youtube_urls, []) + $youtubeLink) AS updatedExtra
+        SET n.extra = apoc.convert.toJson(updatedExtra)
+    """)
+                .bind(uuid).to("uuid")
+                .bind(youtubeLink).to("youtubeLink")
+                .run();
+    }
+
 }
