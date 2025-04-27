@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { fetchGraphData, fetchNodeDetail, fetchRecommendation, confirmNode } from '../api';
+import { useCallback } from 'react';
+import { fetchGraphData, fetchRecommendation, confirmNode } from '../api';
 import { v4 as uuid } from 'uuid';
 
 export const useNodeManagement = ({

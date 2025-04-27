@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { upload } from '../../api';
 import { FaFileUpload, FaFileAlt } from 'react-icons/fa';
 
@@ -8,6 +8,7 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
   const [textInput, setTextInput] = useState('');
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -30,15 +31,21 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
         formData.append('file', file);
       }
 
-      await upload(formData);
-      setTextInput('');
-      setFile(null);
-      setFileName('');
-      setSelectedOption(null);
-      setShowOptions(false);
-      onUploadSuccess();
+      const response = await upload(formData);
+      
+      if (response) {
+        setTextInput('');
+        setFile(null);
+        setFileName('');
+        setSelectedOption(null);
+        setShowOptions(false);
+        onUploadSuccess();
+      } else {
+        throw new Error('Upload failed');
+      }
     } catch (error) {
       console.error('Error uploading:', error);
+      alert('Upload failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +62,7 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
       fontFamily: 'Inter, sans-serif',
       display: 'flex',
       justifyContent: 'center',
-      gap: '8px'
+      gap: '8px',
     }}>
       <button
         onClick={() => {
@@ -77,7 +84,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
           opacity: isLoading ? 0.5 : 1,
           fontFamily: 'Inter, sans-serif',
           width: '200px',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          pointerEvents: 'auto'
         }}
       >
         <img 
@@ -111,7 +119,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
             opacity: isLoading ? 0.5 : 1,
             fontFamily: 'Inter, sans-serif',
-            width: '200px'
+            width: '200px',
+            pointerEvents: 'auto'
           }}
         >
           <img 
@@ -139,7 +148,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 1001,
-          fontFamily: 'Inter, sans-serif'
+          fontFamily: 'Inter, sans-serif',
+          pointerEvents: 'auto'
         }}>
           <div style={{
             backgroundColor: 'rgb(248,234,212)',
@@ -160,7 +170,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '16px'
+              gap: '16px',
+              pointerEvents: 'auto'
             }}>
               <div style={{
                 display: 'flex',
@@ -231,7 +242,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
                   padding: '24px',
                   textAlign: 'center',
                   cursor: 'pointer',
-                  fontFamily: 'Inter, sans-serif'
+                  fontFamily: 'Inter, sans-serif',
+                  pointerEvents: 'auto'
                 }}
                 onDragOver={(e) => {
                   e.preventDefault();
@@ -242,14 +254,16 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
                   e.stopPropagation();
                   const file = e.dataTransfer.files[0];
                   if (file) {
-                    handleFileChange(e);
+                    setFile(file);
+                    setFileName(file.name);
                   }
                 }}
                 onClick={() => {
-                  // This is a placeholder for the file input
+                  fileInputRef.current?.click();
                 }}
                 >
                   <input
+                    ref={fileInputRef}
                     type="file"
                     onChange={handleFileChange}
                     style={{ display: 'none' }}
@@ -269,7 +283,7 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
                     color: 'rgb(61,60,61)',
                     fontFamily: 'Inter, sans-serif'
                   }}>
-                    Drag and drop a file here, or click to select
+                    {fileName || 'Drag and drop a file here, or click to select'}
                   </p>
                 </div>
               ) : selectedOption === 'text' ? (
@@ -286,7 +300,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
                     resize: 'none',
                     backgroundColor: 'white',
                     color: 'rgb(61,60,61)',
-                    fontFamily: 'Inter, sans-serif'
+                    fontFamily: 'Inter, sans-serif',
+                    pointerEvents: 'auto'
                   }}
                 />
               ) : ('')}

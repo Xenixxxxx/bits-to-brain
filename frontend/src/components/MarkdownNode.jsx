@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { Handle, Position } from 'reactflow';
 
 export const MarkdownNode = ({ data }) => {
@@ -8,8 +7,8 @@ export const MarkdownNode = ({ data }) => {
   return (
     <div
       style={{
-        padding: '2px',  // 减小内边距
-        borderRadius: '12px',  // 改为圆角矩形
+        padding: '2px', 
+        borderRadius: '12px', 
         backgroundColor: data.isSelected 
           ? '#ffd803' 
           : isHovered 
@@ -25,21 +24,18 @@ export const MarkdownNode = ({ data }) => {
             : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.1), 0 0 10px 5px rgba(230, 230, 230, 0.2), 0 0 20px 10px rgba(180, 180, 180, 0.1), 0 0 30px 15px rgba(143, 143, 143, 0.05)',
         fontFamily: 'Inter, sans-serif',
         position: 'relative',
-        width: isHovered ? `${data.size * 2}px` : `${data.size * 1.5}px`,  // 增加宽度
-        height: isHovered ? `${data.size}px` : `${data.size * 0.67}px`,  // 保持高度不变
+        width: isHovered ? `${data.size * 2}px` : `${data.size * 1.5}px`,
+        height: isHovered ? `${data.size}px` : `${data.size * 0.67}px`, 
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
         textAlign: 'center',
-        zIndex: 2,  // 确保节点在最上层
-        transition: 'all 0.3s ease-in-out',  // 添加所有属性的过渡效果
-        transform: isHovered ? 'translateY(-15px)' : 'translateY(0)',  // 悬停时位移变为3倍
-        outline: 'none',  // 移除白框
-        overflow: 'visible',  // 允许内容溢出
-        // backdropFilter: 'blur(4px)',  // 添加背景模糊
-        // WebkitBackdropFilter: 'blur(4px)',  // Safari 支持
-        // filter: 'blur(0.5px)'  // 添加轻微模糊
+        zIndex: 2,  
+        transition: 'all 0.3s ease-in-out', 
+        transform: isHovered ? 'translateY(-15px)' : 'translateY(0)',  
+        outline: 'none', 
+        overflow: 'visible', 
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -50,7 +46,7 @@ export const MarkdownNode = ({ data }) => {
         left: 0,
         right: 0,
         bottom: 0,
-        borderRadius: '12px',  // 改为圆角矩形
+        borderRadius: '12px', 
         background: 'radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)',
         pointerEvents: 'none'
       }} />
@@ -66,22 +62,22 @@ export const MarkdownNode = ({ data }) => {
           height: 0,
           borderRadius: '50%',
           pointerEvents: 'none',
-          zIndex: 0,  // 确保连接点在最底层
-          opacity: 0  // 完全透明
+          zIndex: 0,  
+          opacity: 0  
         }}
         isConnectable={false}
         id="target"
       />
       <div style={{
-        fontSize: isHovered ? `${data.size * 0.15}px` : `${data.size * 0.1}px`,  // 悬停时字体大小也变为3倍
+        fontSize: isHovered ? `${data.size * 0.15}px` : `${data.size * 0.1}px`, 
         fontWeight: '500',
-        marginBottom: '2px',  // 减小底部间距
+        marginBottom: '2px',  
         color: '#2d334a',
         fontFamily: 'Inter, sans-serif',
-        maxWidth: '100%',  // 使用百分比确保不会超出父容器
-        overflow: 'visible',  // 允许内容溢出
-        whiteSpace: 'normal',  // 允许文字换行
-        padding: '0 2px'  // 添加较小的内边距防止文字贴边
+        maxWidth: '100%',  
+        overflow: 'visible',  
+        whiteSpace: 'normal',  
+        padding: '0 2px'  
       }}>
         {data.label}
       </div>
@@ -89,14 +85,11 @@ export const MarkdownNode = ({ data }) => {
         fontSize: '12px',
         color: 'rgb(255, 255, 255)',
         fontFamily: 'Inter, sans-serif',
-        maxWidth: '100px',  // 限制文本宽度
+        maxWidth: '100px',  
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap'
       }}>
-        {/* <ReactMarkdown>
-          {data.content}
-        </ReactMarkdown> */}
       </div>
       <Handle
         type="source"
@@ -110,8 +103,8 @@ export const MarkdownNode = ({ data }) => {
           height: 0,
           borderRadius: '50%',
           pointerEvents: 'none',
-          zIndex: 0,  // 确保连接点在最底层
-          opacity: 0  // 完全透明
+          zIndex: 0,  
+          opacity: 0  
         }}
         isConnectable={false}
         id="source"

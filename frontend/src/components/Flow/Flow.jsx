@@ -1,11 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import ReactFlow, {
-  Background,
-  Controls,
-  MiniMap,
   useNodesState,
   useEdgesState,
-  addEdge,
   useReactFlow,
   ReactFlowProvider,
   SelectionMode
@@ -17,17 +13,14 @@ import { MarkdownNode } from '../MarkdownNode';
 import { NodeDetails } from './NodeDetails';
 import { UploadBox } from './UploadBox';
 import { useNodeManagement } from '../../hooks/useNodeManagement';
-import { VantaBackground } from './VantaBackground';
 import { Toast } from '../Toast';
 
 const nodeTypes = {
   markdown: MarkdownNode,
 };
 
-// 创建一个全局对象来存储节点位置
 const nodePositions = new Map();
 
-// 防抖函数
 const debounce = (func, wait) => {
   let timeout;
   return function executedFunction(...args) {
@@ -40,32 +33,28 @@ const debounce = (func, wait) => {
   };
 };
 
-// 计算力导向布局
 const getForceLayoutedElements = (nodes, edges) => {
-  // 创建节点和边的副本，避免修改原始数据
   const nodesCopy = nodes.map(node => ({ ...node }));
   const edgesCopy = edges.map(edge => ({ ...edge }));
 
-  // 创建力导向模拟
   const simulation = forceSimulation(nodesCopy)
     .force('link', forceLink(edgesCopy)
       .id(d => d.id)
-      .distance(200)  // 边的长度
-      .strength(0.5)  // 边的强度
+      .distance(200)
+      .strength(0.5)
     )
     .force('charge', forceManyBody()
-      .strength(-500)  // 节点间的排斥力
+      .strength(-500)
     )
-    .force('center', forceCenter(0, 0))  // 中心力
+    .force('center', forceCenter(0, 0)) 
     .force('collision', forceCollide()
-      .radius(100)  // 节点碰撞半径
-      .strength(1)  // 碰撞强度
+      .radius(100)  
+      .strength(1)  
     );
 
-  // 运行模拟
-  simulation.tick(300);  // 运行300次迭代
 
-  // 获取计算后的节点位置
+  simulation.tick(300);  
+
   const layoutedNodes = nodesCopy.map(node => ({
     ...node,
     position: {
@@ -74,7 +63,6 @@ const getForceLayoutedElements = (nodes, edges) => {
     }
   }));
 
-  // 保持原始边的 source 和 target
   const layoutedEdges = edges.map(edge => ({
     ...edge,
     source: edge.source,
@@ -84,7 +72,6 @@ const getForceLayoutedElements = (nodes, edges) => {
   return { nodes: layoutedNodes, edges: layoutedEdges };
 };
 
-// 内部 Flow 组件
 const FlowInner = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -104,7 +91,6 @@ const FlowInner = () => {
       setIsRefreshing(true);
       const data = await fetchGraphData();
       
-      // 检查数据是否真的发生了变化
       const dataString = JSON.stringify(data);
       if (dataString === JSON.stringify(previousDataRef.current)) {
         setIsRefreshing(false);
@@ -121,7 +107,7 @@ const FlowInner = () => {
             label: node.title,
             content: node.title,
             isRecommendation: false,
-            size: Math.random() * 40 + 80  // 随机生成 80-120 之间的大小
+            size: Math.random() * 40 + 80  
           }
         }));
 
@@ -140,13 +126,11 @@ const FlowInner = () => {
           }
         }));
 
-        // 应用力导向布局
         const { nodes: layoutedNodes, edges: layoutedEdges } = getForceLayoutedElements(
           initialNodes,
           initialEdges
         );
 
-        // 使用 requestAnimationFrame 来确保平滑更新
         requestAnimationFrame(() => {
           setNodes(layoutedNodes);
           setEdges(layoutedEdges);
@@ -159,7 +143,6 @@ const FlowInner = () => {
     }
   }, [setNodes, setEdges]);
 
-  // 使用防抖的刷新函数
   const debouncedRefresh = useCallback(
     debounce(() => {
       fetchData();
@@ -186,18 +169,20 @@ const FlowInner = () => {
     fetchData();
   }, [fetchData]);
 
-  // 添加边的状态变化监听
   useEffect(() => {
     console.log('Edges updated:', edges);
   }, [edges]);
 
+  const convertToVideoUrl = (videoId) => {
+    const baseurl = "https://www.videoindexer.ai/embed/player/914a5e40-8e73-4e7a-8d13-ff0193a05e75/videoId/?&locale=en&location=trial";
+    return baseurl.replace('videoId', videoId);
+  }
+
   const onNodeClick = useCallback(async (event, node) => {
     if (!isPanMode) {
-      // 检查节点是否已经被选中
       const isCurrentlySelected = selectedNodes.includes(node.id);
       
       if (isCurrentlySelected) {
-        // 如果节点已经被选中，则取消选中
         setSelectedNodes(prev => prev.filter(id => id !== node.id));
         setNodes(nds =>
           nds.map(n => ({
@@ -209,7 +194,6 @@ const FlowInner = () => {
           }))
         );
       } else {
-        // 如果节点未被选中，且当前选中的节点数量小于 3，则选中该节点
         if (selectedNodes.length < 3) {
           setSelectedNodes(prev => [...prev, node.id]);
           setNodes(nds =>
@@ -222,7 +206,6 @@ const FlowInner = () => {
             }))
           );
         } else {
-          // 显示错误提示
           setToastMessage('Maximum 3 nodes can be selected for demo');
         }
       }
@@ -235,7 +218,18 @@ const FlowInner = () => {
     }
 
     try {
-      const detail = await fetchNodeDetail(node.id);
+      let detail = await fetchNodeDetail(node.id);
+      const extra_formed = {
+        ...detail.extra,
+        video_urls: [
+          ...(detail.extra.video_ids ? detail.extra.video_ids.map(item => convertToVideoUrl(item)) : []),  // 先 map 处理 arr1
+          ...(detail.extra.youtube_urls || [])                               // 直接展开 arr2
+        ],
+      }
+      detail = {
+        ...detail,
+        extra: extra_formed
+      }
       setSelectedNode({
         ...node,
         detail,
@@ -243,10 +237,25 @@ const FlowInner = () => {
     } catch (error) {
       console.error('Error fetching node detail:', error);
     }
-  }, [isPanMode, selectedNodes]);
+  }, [isPanMode, selectedNodes, setNodes]);
+
+  const onSelectionChange = useCallback(({ nodes }) => {
+    if (!isPanMode) {
+      const selectedIds = nodes.map(node => node.id);
+      setSelectedNodes(selectedIds);
+      setNodes(nds =>
+        nds.map(n => ({
+          ...n,
+          data: {
+            ...n.data,
+            isSelected: selectedIds.includes(n.id)
+          }
+        }))
+      );
+    }
+  }, [isPanMode, setNodes]);
 
   const onNodeDrag = useCallback((event, node) => {
-    // 实时更新节点位置，但不触发边的重渲染
     setNodes((nds) =>
       nds.map((n) => {
         if (n.id === node.id) {
@@ -264,7 +273,6 @@ const FlowInner = () => {
     const newPosition = node.position;
     nodePositions.set(node.id, newPosition);
     
-    // 更新节点位置
     setNodes((nds) =>
       nds.map((n) => {
         if (n.id === node.id) {
@@ -277,13 +285,11 @@ const FlowInner = () => {
       })
     );
 
-    // 更新边的位置
     setEdges((eds) =>
       eds.map((edge) => {
         if (edge.source === node.id || edge.target === node.id) {
           return {
             ...edge,
-            // 使用时间戳确保边重新计算位置
             id: `${edge.id}-${Date.now()}`,
           };
         }
@@ -292,12 +298,10 @@ const FlowInner = () => {
     );
   }, [setNodes, setEdges]);
 
-  // 修改：在切换模式时清除选中状态
   const handleModeChange = useCallback((isPan) => {
     setIsPanMode(isPan);
     setSelectedNode(null);
     setSelectedNodes([]);
-    // 清除所有节点的选中状态
     setNodes((nds) =>
       nds.map((n) => ({
         ...n,
@@ -327,10 +331,8 @@ const FlowInner = () => {
       const nodeIds = selectedNodes.map(node => node.id);
       const result = await mergeNodesApi(nodeIds);
       
-      // 刷新图表数据
       await fetchData();
       
-      // 清除选中状态
       setSelectedNodes([]);
       setNodes(nds =>
         nds.map(n => ({
@@ -349,7 +351,6 @@ const FlowInner = () => {
     }
   }, [nodes, fetchData]);
 
-  // 导出刷新函数和节点选中状态管理函数
   window.refreshFlow = debouncedRefresh;
   window.getSelectedNode = () => selectedNode;
   window.setSelectedNode = (node) => {
@@ -547,6 +548,7 @@ const FlowInner = () => {
         onNodeClick={onNodeClick}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
+        onSelectionChange={onSelectionChange}
         nodeTypes={nodeTypes}
         fitView
         nodesDraggable={isPanMode}
@@ -554,12 +556,11 @@ const FlowInner = () => {
         elementsSelectable={!isPanMode}
         selectionMode={SelectionMode.Full}
         panOnDrag={isPanMode}
-        // panOnScroll={isPanMode}
         zoomOnScroll={true}
         zoomOnDoubleClick={true}
         selectionOnDrag={!isPanMode}
-        selectionKeyCode="Shift"
-        multiSelectionKeyCode="Shift"
+        selectionKeyCode="Control"
+        multiSelectionKeyCode="Control"
         nodesFocusable={!isPanMode}
         edgesFocusable={false}
         edgesUpdatable={false}
@@ -585,7 +586,7 @@ const FlowInner = () => {
         {/* <MiniMap /> */}
         {selectedNode && isPanMode && (
           <div>
-            <div style={{ pointerEvents: 'auto' }}>  {/* 恢复 NodeDetails 的点击事件 */}
+            <div style={{ pointerEvents: 'auto' }}> 
               <NodeDetails
                 selectedNode={selectedNode}
                 onClose={() => setSelectedNode(null)}
@@ -604,20 +605,22 @@ const FlowInner = () => {
         <div className="loading-spinner" />
       </div>
 
-      <UploadBox 
-        onUploadSuccess={debouncedRefresh} 
-        isLoading={isLoading} 
-        setIsLoading={setIsLoading}
-        selectedNodes={selectedNodes}
-        mergeNodes={mergeNodes}
-      />
-
-      {toastMessage && (
-        <Toast
-          message={toastMessage}
-          onClose={() => setToastMessage(null)}
+      <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', pointerEvents: 'none'}}>
+        <UploadBox 
+          onUploadSuccess={debouncedRefresh} 
+          isLoading={isLoading} 
+          setIsLoading={setIsLoading}
+          selectedNodes={selectedNodes}
+          mergeNodes={mergeNodes}
         />
-      )}
+
+        {toastMessage && (
+          <Toast
+            message={toastMessage}
+            onClose={() => setToastMessage(null)}
+          />
+        )}
+      </div>
     </div>
   );
 };

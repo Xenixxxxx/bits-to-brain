@@ -23,13 +23,13 @@ export const NodeDetails = ({
 
   const handlePrevVideo = () => {
     setCurrentVideoIndex(prev => 
-      prev === 0 ? selectedNode.detail.extra.youtube_urls.length - 1 : prev - 1
+      prev === 0 ? selectedNode.detail.extra.video_urls.length - 1 : prev - 1
     );
   };
 
   const handleNextVideo = () => {
     setCurrentVideoIndex(prev => 
-      prev === selectedNode.detail.extra.youtube_urls.length - 1 ? 0 : prev + 1
+      prev === selectedNode.detail.extra.video_urls.length - 1 ? 0 : prev + 1
     );
   };
 
@@ -283,7 +283,7 @@ export const NodeDetails = ({
           maxHeight: '250px',
           position: 'relative'
         }}>
-          {selectedNode.detail.extra.youtube_urls ? (
+          {selectedNode.detail.extra.video_urls && selectedNode.detail.extra.video_urls.length > 0 ? (
             <>
               <button
                 onClick={handlePrevVideo}
@@ -319,7 +319,7 @@ export const NodeDetails = ({
               <iframe 
                 width="100%" 
                 height="250" 
-                src={convertToEmbedUrl(selectedNode.detail.extra.youtube_urls[currentVideoIndex])} 
+                src={convertToEmbedUrl(selectedNode.detail.extra.video_urls[currentVideoIndex])} 
                 frameBorder="0" 
                 allowFullScreen
                 style={{
@@ -346,7 +346,7 @@ export const NodeDetails = ({
                   cursor: 'pointer',
                   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                   zIndex: 1,
-                  visibility: currentVideoIndex === selectedNode.detail.extra.youtube_urls.length - 1 ? 'hidden' : 'visible'
+                  visibility: currentVideoIndex === selectedNode.detail.extra.video_urls.length - 1 ? 'hidden' : 'visible'
                 }}
               >
                 <img 
@@ -370,7 +370,7 @@ export const NodeDetails = ({
                 borderRadius: '4px',
                 fontSize: '0.75rem'
               }}>
-                {currentVideoIndex + 1} / {selectedNode.detail.extra.youtube_urls.length}
+                {currentVideoIndex + 1} / {selectedNode.detail.extra.video_urls.length}
               </div>
             </>
           ) : (
@@ -393,7 +393,11 @@ export const NodeDetails = ({
           marginBottom: '12px',
           maxHeight: '250px'
         }}>
-          Other Content
+          {selectedNode.detail.extra.website_urls ? selectedNode.detail.extra.website_urls.map(url => (
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              {url}
+            </a>
+          )) : 'No website available'}
         </div>
       )}
 

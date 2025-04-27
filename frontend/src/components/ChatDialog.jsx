@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { sendMessage } from '../api/chat';
 import ReactMarkdown from 'react-markdown';
+import { fetchNodeDetail } from '../api';
 
 export const ChatDialog = () => {
   const [messages, setMessages] = useState([]);
@@ -48,18 +49,34 @@ export const ChatDialog = () => {
         }]);
       }
 
-      // 刷新流程图，但保持节点选中状态
       if (window.refreshFlow) {
         const currentSelectedNode = window.getSelectedNode?.();
-        window.refreshFlow();
         if (currentSelectedNode) {
-          // 等待刷新完成后重新选中节点
-          setTimeout(() => {
-            window.setSelectedNode?.(currentSelectedNode);
-          }, 100);
+          await window.refreshFlow();
+
+          const detail = await fetchNodeDetail(currentSelectedNode.id);
+
+          const extra_formed = {
+            ...detail.extra,
+            video_urls: [
+              ...(detail.extra.video_ids ? detail.extra.video_ids.map(item => convertToVideoUrl(item)) : []),  
+              ...(detail.extra.youtube_urls || [])                               
+            ],
+          }
+          detail = {
+            ...detail,
+            extra: extra_formed
+          }
+          window.setSelectedNode?.({
+            ...selectedNode,
+            detail,
+          });
+        } else {
+          window.refreshFlow();
         }
       }
-    } catch (error) {
+    } catch (_) {
+      console.error('Error processing message:', _);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: 'Sorry, there was an error processing your message.'
@@ -91,18 +108,25 @@ export const ChatDialog = () => {
         buttons: response.buttons
       }]);
 
-      // 刷新流程图，但保持节点选中状态
+
       if (window.refreshFlow) {
         const currentSelectedNode = window.getSelectedNode?.();
-        window.refreshFlow();
         if (currentSelectedNode) {
-          // 等待刷新完成后重新选中节点
-          setTimeout(() => {
-            window.setSelectedNode?.(currentSelectedNode);
-          }, 100);
+
+          await window.refreshFlow();
+
+          const updatedNode = await fetchNodeDetail(currentSelectedNode.id);
+
+          window.setSelectedNode?.({
+            ...currentSelectedNode,
+            detail: updatedNode
+          });
+        } else {
+          window.refreshFlow();
         }
       }
     } catch (error) {
+      console.error('Error processing button click:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: 'Sorry, there was an error processing your selection.'
