@@ -17,6 +17,11 @@ export const ChatDialog = () => {
     scrollToBottom();
   }, [messages]);
 
+  const convertToVideoUrl = (videoId) => {
+    const baseurl = "https://www.videoindexer.ai/embed/player/914a5e40-8e73-4e7a-8d13-ff0193a05e75/videoId/?&locale=en&location=trial";
+    return baseurl.replace('videoId', videoId);
+  }
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -54,7 +59,7 @@ export const ChatDialog = () => {
         if (currentSelectedNode) {
           await window.refreshFlow();
 
-          const detail = await fetchNodeDetail(currentSelectedNode.id);
+          let detail = await fetchNodeDetail(currentSelectedNode.id);
 
           const extra_formed = {
             ...detail.extra,
