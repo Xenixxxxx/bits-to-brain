@@ -51,7 +51,8 @@ public class AzureVideoIndexerClient {
 
     public String uploadVideo(String name, File videoFile) throws IOException {
         String accessToken = getAccessToken();
-        String url = String.format("https://api.videoindexer.ai/%s/Accounts/%s/Videos?name=%s&accessToken=%s",
+        String url = String.format(
+                "https://api.videoindexer.ai/%s/Accounts/%s/Videos?name=%s&privacy=Public&accessToken=%s",
                 location, accountId, name, accessToken);
 
         HttpHeaders headers = new HttpHeaders();

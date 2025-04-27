@@ -1,7 +1,6 @@
 package com.bits2brain.backend.controller;
 
 import com.bits2brain.backend.service.KnowledgeService;
-import com.bits2brain.backend.util.VideoEmbedHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +18,10 @@ import static com.bits2brain.backend.util.Const.MAX_MERGE_COUNT;
 public class NodeController {
 
     private final KnowledgeService knowledgeService;
-    private final VideoEmbedHelper videoEmbedHelper;
 
 
-    public NodeController(KnowledgeService knowledgeService,VideoEmbedHelper videoEmbedHelper) {
+    public NodeController(KnowledgeService knowledgeService) {
         this.knowledgeService = knowledgeService;
-        this.videoEmbedHelper = videoEmbedHelper;
     }
 
     @GetMapping("/{uuid}")
@@ -59,16 +56,6 @@ public class NodeController {
         return ResponseEntity.ok("Saved and linked");
     }
 
-    @GetMapping("/video/embed-url")
-    public Map<String, Object> getEmbedUrl(@RequestParam String videoId) {
-        try {
-            String url = videoEmbedHelper.getEmbedUrl(videoId);
-            return Map.of("url", url);
-        } catch (Exception e) {
-            log.error("Failed to generate embed URL", e);
-            return Map.of("error", "Failed to generate embed URL", "details", e.getMessage());
-        }
-    }
 
     @PostMapping("/merge")
     public ResponseEntity<?> mergeNodes(@RequestBody List<String> nodeIds) {
