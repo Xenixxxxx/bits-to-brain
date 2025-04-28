@@ -216,7 +216,7 @@ public class KnowledgeService {
         // 2. Combine all titles and texts
         String combinedTitle = nodes.stream().map(n -> (String) n.get("title")).collect(Collectors.joining(" | "));
         String combinedText = IntStream.range(0, nodes.size())
-                .mapToObj(i -> "Concept " + (i + 1) + ": " + nodes.get(i).get("title") + "\n" + nodes.get(i).get("text"))
+                .mapToObj(i -> "Topic " + (i + 1) + ": " + nodes.get(i).get("title") + "\n" + nodes.get(i).get("text"))
                 .collect(Collectors.joining("\n\n"));
 
         log.info("[mergeNodes] Combined title: {}", combinedTitle);

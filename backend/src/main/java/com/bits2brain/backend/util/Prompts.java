@@ -56,17 +56,19 @@ public class Prompts {
     public static final String MERGE_KNOWLEDGE = """
             You are a knowledge consolidation assistant.
             
-            Given the combined content below, which includes multiple **similar or related knowledge points**, your task is to synthesize them into a single structured representation:
+            You will receive several **knowledge points**. Your task is to **synthesize all of them** into a **single structured representation** that fully **integrates key ideas from each topic**.
             
-            1. "title" — A concise, **specific** title (within 5 words) that clearly identifies the **main topic or entity**, suitable as a knowledge graph node. Avoid generic words like "Overview", "Summary", "Understanding", "Introduction", etc.
-            2. "summary" — A **structured summary using Markdown**, including headings and bullet points where appropriate. About 3–5 paragraphs.
+            Your output must:
             
-            Return ONLY a valid raw **JSON** object. DO NOT include any code block markers (like ```json) or additional explanations.
+            1. Create a "title" — A concise, **specific** title (within 5 words) that clearly captures the **combined essence** of all topics. Avoid generic words like "Overview", "Summary", "Understanding", "Introduction", etc.
+            2. Write a "summary" — A **structured summary using Markdown**, organized into headings and bullet points. The summary must **explicitly cover major points from every input topic**. Write about 3–5 paragraphs.
+            
+            Return ONLY a valid raw **JSON** object. DO NOT include any code block markers (like ```json) or any extra explanations.
             
             Format:
             {
               "title": "Concise and meaningful title",
-              "summary": "## Key Concepts\\n\\n- ...\\n- ...\\n\\n### Details\\n\\n- ..."
+              "summary": "## Key Concepts\\\\n\\\\n- ...\\\\n- ...\\\\n\\\\n### Details\\\\n\\\\n- ..."
             }
             
             Content:
