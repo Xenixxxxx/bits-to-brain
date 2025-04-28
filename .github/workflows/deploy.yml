@@ -42,3 +42,8 @@ jobs:
 
             echo "Deployment done!"
           EOF
+
+      - name: Create .env file
+        run: |
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+

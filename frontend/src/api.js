@@ -1,8 +1,8 @@
 // API 基础配置
+import { config } from './config';
+
 const API_CONFIG = {
-  // 切换这两个地址来控制 API 访问
-  BASE_URL: 'http://20.92.230.227:8080',
-  // BASE_URL: 'http://192.168.50.113:8080',
+  BASE_URL: config.BASE_URL,
 };
 
 export const fetchGraphData = async () => {

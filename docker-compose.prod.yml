@@ -25,6 +25,9 @@ services:
     restart: always
     ports:
       - "80:80"
+    environment:
+      - REACT_APP_ENV=PROD
+      - REACT_APP_API_URL=${{ secrets.HOST }}
 
   neo4j:
     image: neo4j:5.15

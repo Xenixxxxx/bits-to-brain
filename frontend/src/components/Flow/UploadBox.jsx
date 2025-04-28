@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { upload } from '../../api';
-import { FaFileUpload, FaFileAlt } from 'react-icons/fa';
+import './upload-button.css';
 
 export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNodes, mergeNodes, isMerging }) => {
   const [showOptions, setShowOptions] = useState(false);
@@ -56,7 +56,7 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
       position: 'absolute',
       bottom: '10%',
       width: '100%',
-      height: '10%',
+      height: '5%',
       left: '0%',
       zIndex: 1000,
       fontFamily: 'Inter, sans-serif',
@@ -64,64 +64,44 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
       justifyContent: 'center',
       gap: '8px',
     }}>
-      <button
-        onClick={() => {
-          setShowOptions(true);
-          setSelectedOption(null);
-        }}
-        disabled={isLoading}
-        style={{
-          padding: '8px 16px',
-          backgroundColor: '#272343',
-          color: '#fffffe',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: isLoading ? 'not-allowed' : 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          opacity: isLoading ? 0.5 : 1,
-          fontFamily: 'Inter, sans-serif',
-          width: '200px',
-          justifyContent: 'center',
-          pointerEvents: 'auto'
-        }}
+    <button className="upload-button-bl"
+            onClick={() => {
+              setShowOptions(true);
+              setSelectedOption(null);
+            }}
+            disabled={isLoading}>
+      <svg
+        aria-hidden="true"
+        stroke="currentColor"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <img 
-          src="https://api.iconify.design/fluent:upload-24-filled.svg" 
-          alt="Upload" 
-          style={{
-            width: '20px',
-            height: '20px',
-            filter: 'invert(1)'
-          }}
-        />
-        Upload
-      </button>
+        <path
+          strokeWidth="2"
+          stroke="#fffffff"
+          d="M13.5 3H12H8C6.34315 3 5 4.34315 5 6V18C5 19.6569 6.34315 21 8 21H11M13.5 3L19 8.625M13.5 3V7.625C13.5 8.17728 13.9477 8.625 14.5 8.625H19M19 8.625V11.8125"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        ></path>
+        <path
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          strokeWidth="2"
+          stroke="#fffffff"
+          d="M17 15V18M17 21V18M17 18H14M17 18H20"
+        ></path>
+      </svg>
+      UPLOAD
+    </button>
 
       {selectedNodes.length > 0 && (
-        <button
+        <button className="upload-button-yl"
           onClick={() => {
             mergeNodes();
           }}
           disabled={isLoading || isMerging}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#ffd803',
-            color: '#272343',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: (isLoading || isMerging) ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            opacity: (isLoading || isMerging) ? 0.5 : 1,
-            fontFamily: 'Inter, sans-serif',
-            width: '200px',
-            pointerEvents: 'auto'
-          }}
         >
           {isMerging ? (
             <div className="loading-spinner" style={{

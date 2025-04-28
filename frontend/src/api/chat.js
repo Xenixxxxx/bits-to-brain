@@ -1,4 +1,6 @@
-const CHAT_API_URL = 'http://20.92.230.227:8080/api/chat';
+import { config } from '../config';
+
+const CHAT_API_URL = `${config.BASE_URL}/api/chat`;
 
 export const sendMessage = async (message, options = {}) => {
   try {
