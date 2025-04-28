@@ -4,11 +4,13 @@ services:
   backend:
     build:
       context: ./backend
+      dockerfile: ./Dockerfile.prod
     container_name: backend-dev
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     volumes:
       - ./backend/data:/app/data
+      - /opt/bits2brain/config/application.properties:/app/config/application.properties
     restart: always
     depends_on:
       neo4j:
@@ -22,7 +24,7 @@ services:
     container_name: frontend-dev
     restart: always
     ports:
-      - "3000:80"
+      - "80:80"
 
   neo4j:
     image: neo4j:5.15

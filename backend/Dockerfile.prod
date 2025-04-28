@@ -18,4 +18,4 @@ RUN chmod +x entrypoint.sh
 
 VOLUME ["/app/data"]
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=file:/app/config/application.properties"]
