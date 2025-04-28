@@ -38,7 +38,7 @@ jobs:
 
             echo "Restarting Docker services..."
             docker-compose down
-            docker-compose -f docker-compose.prod.yml up --build --force-recreate
+            docker-compose -f docker-compose.prod.yml up --build -d --force-recreate
 
             echo "Deployment done!"
           EOF
