@@ -4,7 +4,8 @@ import ReactFlow, {
   useEdgesState,
   useReactFlow,
   ReactFlowProvider,
-  SelectionMode
+  SelectionMode,
+  Background
 } from 'reactflow';
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide } from 'd3-force';
 import 'reactflow/dist/style.css';
@@ -589,6 +590,7 @@ const FlowInner = () => {
         maxZoom={4}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
       >
+        <Background size={1.5}/>
         {/* <VantaBackground /> */}
         {/* <Controls /> */}
         {/* <MiniMap /> */}

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useReactFlow } from 'reactflow';
+import './recommend-button.css';
 
 export const NodeDetails = ({ 
   selectedNode, 
@@ -237,7 +238,7 @@ export const NodeDetails = ({
           >
             Other
           </button>
-          <button
+          <button className='recommend-button'
             onClick={() => {
               if (hasPendingRecommendations) {
                 handleCancelRecommend();
@@ -245,24 +246,13 @@ export const NodeDetails = ({
                 setCanRecommend(true);
               }
             }}
-            style={{
-              background: 'none',
-              border: '1px solid #6C63FF',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              fontFamily: 'Inter, sans-serif',
-              transition: 'background-color 0.3s ease',
-              marginLeft: '50%',
-              marginRight: '10%',
-              color: canRecommend ? '#6C63FF' : '#6C63FF',
-              visibility: selectedNode.data?.isRecommendation ? 'hidden' : 'visible',
-            }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(108, 99, 255, 0.2)'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
           >
-            {hasPendingRecommendations ? 'Cancel' : 'Discover'}
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"></path>
+            </svg>
+            <div className="recommend-text">
+              {hasPendingRecommendations ? 'Cancel' : 'Discover'}
+            </div>
           </button>
         </div>
         <button 

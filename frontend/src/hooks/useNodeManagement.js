@@ -100,10 +100,8 @@ export const useNodeManagement = ({
         confirmedNode.id
       );
 
-      // 使用 fetchData 函数更新图，但保持推荐节点的位置
       const data = await fetchGraphData();
       if (data) {
-        // 更新节点和边
         const updatedNodes = data.nodes.map(node => {
           return {
             id: node.uuid,
