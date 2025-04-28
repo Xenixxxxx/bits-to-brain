@@ -116,7 +116,8 @@ export const useNodeManagement = ({
               label: node.title,
               content: node.title,
               isRecommendation: false,
-              isSelected: false
+              isSelected: false,
+              size: 80
             }
           };
         });

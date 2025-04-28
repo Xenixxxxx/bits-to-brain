@@ -12,11 +12,17 @@ export const MarkdownNode = ({ data }) => {
         backgroundColor: data.isSelected 
           ? '#ffd803' 
           : isHovered 
-            ? '#ffd803' 
-            : '#bae8e8',
+            ? data.isRecommendation 
+              ? '#bae8e8'
+              : '#ffd803' 
+            : data.isRecommendation 
+              ? '#fffffe'
+              : '#bae8e8',
         border: data.isSelected
           ? '2px solid #272343'
-          : '0.2px solid #000000',
+          : data.isRecommendation
+            ? '1px dashed #000000'
+            : '0.2px solid #000000',
         boxShadow: data.isSelected
           ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 2px #272343, 0 0 30px 10px rgba(255, 216, 3, 0.2), 0 0 60px 20px rgba(255, 216, 3, 0.1), 0 0 90px 30px rgba(255, 216, 3, 0.05)'
           : isHovered 
