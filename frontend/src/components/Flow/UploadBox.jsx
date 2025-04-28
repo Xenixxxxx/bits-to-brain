@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { upload } from '../../api';
 import { FaFileUpload, FaFileAlt } from 'react-icons/fa';
 
-export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNodes, mergeNodes }) => {
+export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNodes, mergeNodes, isMerging }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [textInput, setTextInput] = useState('');
@@ -105,34 +105,45 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
           onClick={() => {
             mergeNodes();
           }}
-          disabled={isLoading}
+          disabled={isLoading || isMerging}
           style={{
             padding: '8px 16px',
             backgroundColor: '#ffd803',
             color: '#272343',
             border: 'none',
             borderRadius: '8px',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
+            cursor: (isLoading || isMerging) ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            opacity: isLoading ? 0.5 : 1,
+            opacity: (isLoading || isMerging) ? 0.5 : 1,
             fontFamily: 'Inter, sans-serif',
             width: '200px',
             pointerEvents: 'auto'
           }}
         >
-          <img 
-            src="https://api.iconify.design/fluent:merge-24-filled.svg" 
-            alt="Merge" 
-            style={{
+          {isMerging ? (
+            <div className="loading-spinner" style={{
               width: '20px',
               height: '20px',
-              filter: 'invert(0.2)'
-            }}
-          />
-          Merge
+              border: '2px solid #272343',
+              borderTop: '2px solid transparent',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+          ) : (
+            <img 
+              src="https://api.iconify.design/fluent:merge-24-filled.svg" 
+              alt="Merge" 
+              style={{
+                width: '20px',
+                height: '20px',
+                filter: 'invert(0.2)'
+              }}
+            />
+          )}
+          {isMerging ? 'Merging...' : 'Merge'}
         </button>
       )}
 

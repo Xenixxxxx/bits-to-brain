@@ -47,7 +47,8 @@ export const useNodeManagement = ({
               sourceNodeId: selectedNode.id,
               title: rec.title,
               summary: rec.summary,
-              size: 80
+              size: 80,
+              isSelected: false
             },
           };
         });
@@ -104,7 +105,6 @@ export const useNodeManagement = ({
       if (data) {
         // 更新节点和边
         const updatedNodes = data.nodes.map(node => {
-          // 其他节点使用原有位置或计算新位置
           return {
             id: node.uuid,
             type: 'markdown',
@@ -115,7 +115,8 @@ export const useNodeManagement = ({
             data: {
               label: node.title,
               content: node.title,
-              isRecommendation: false
+              isRecommendation: false,
+              isSelected: false
             }
           };
         });

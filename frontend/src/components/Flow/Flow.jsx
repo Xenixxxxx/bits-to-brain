@@ -77,10 +77,11 @@ const FlowInner = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
   const [selectedNodes, setSelectedNodes] = useState([]);
-  const [isPanMode, setIsPanMode] = useState(true);  // 新增：控制拖拽模式
+  const [isPanMode, setIsPanMode] = useState(true);  
   const [hasPendingRecommendations, setHasPendingRecommendations] = useState(false);
   const [recommendationNodes, setRecommendationNodes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMerging, setIsMerging] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   const previousDataRef = useRef(null);
@@ -107,7 +108,8 @@ const FlowInner = () => {
             label: node.title,
             content: node.title,
             isRecommendation: false,
-            size: 80  
+            size: 80,
+            isSelected: false
           }
         }));
 
@@ -180,28 +182,33 @@ const FlowInner = () => {
 
   const onNodeClick = useCallback(async (event, node) => {
     if (!isPanMode) {
-      const isCurrentlySelected = selectedNodes.includes(node.id);
+      event.preventDefault();
+      event.stopPropagation();
       
-      if (isCurrentlySelected) {
-        setSelectedNodes(prev => prev.filter(id => id !== node.id));
+      // 如果节点已经被选中，则取消选中
+      if (selectedNodes.includes(node.id)) {
+        const newSelectedNodes = selectedNodes.filter(id => id !== node.id);
+        setSelectedNodes(newSelectedNodes);
         setNodes(nds =>
           nds.map(n => ({
             ...n,
             data: {
               ...n.data,
-              isSelected: n.id === node.id ? false : n.data.isSelected
+              isSelected: newSelectedNodes.includes(n.id)
             }
           }))
         );
       } else {
+        // 如果节点未被选中，且选中数量小于3，则选中该节点
         if (selectedNodes.length < 3) {
-          setSelectedNodes(prev => [...prev, node.id]);
+          const newSelectedNodes = [...selectedNodes, node.id];
+          setSelectedNodes(newSelectedNodes);
           setNodes(nds =>
             nds.map(n => ({
               ...n,
               data: {
                 ...n.data,
-                isSelected: n.id === node.id ? true : n.data.isSelected
+                isSelected: newSelectedNodes.includes(n.id)
               }
             }))
           );
@@ -222,8 +229,8 @@ const FlowInner = () => {
       const extra_formed = {
         ...detail.extra,
         video_urls: [
-          ...(detail.extra.video_ids ? detail.extra.video_ids.map(item => convertToVideoUrl(item)) : []),  // 先 map 处理 arr1
-          ...(detail.extra.youtube_urls || [])                               // 直接展开 arr2
+          ...(detail.extra.video_ids ? detail.extra.video_ids.map(item => convertToVideoUrl(item)) : []),
+          ...(detail.extra.youtube_urls || [])
         ],
       }
       detail = {
@@ -239,9 +246,9 @@ const FlowInner = () => {
     }
   }, [isPanMode, selectedNodes, setNodes]);
 
-  const onSelectionChange = useCallback(({ nodes }) => {
+  const onSelectionChange = useCallback(({ nodes: selectedNodes }) => {
     if (!isPanMode) {
-      const selectedIds = nodes.map(node => node.id);
+      const selectedIds = selectedNodes.map(node => node.id);
       setSelectedNodes(selectedIds);
       setNodes(nds =>
         nds.map(n => ({
@@ -315,8 +322,8 @@ const FlowInner = () => {
 
   const mergeNodes = useCallback(async () => {
     try {
+      setIsMerging(true);
       const selectedNodes = nodes.filter(node => node.data.isSelected);
-      console.log('selectedNodes:', selectedNodes);
       
       if (selectedNodes.length < 2) {
         setToastMessage('Please select at least 2 nodes to merge');
@@ -348,6 +355,8 @@ const FlowInner = () => {
     } catch (error) {
       console.error('Error merging nodes:', error);
       setToastMessage(error.message || 'Failed to merge nodes');
+    } finally {
+      setIsMerging(false);
     }
   }, [nodes, fetchData]);
 
@@ -548,20 +557,19 @@ const FlowInner = () => {
         onNodeClick={onNodeClick}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
-        onSelectionChange={onSelectionChange}
         nodeTypes={nodeTypes}
         fitView
         nodesDraggable={isPanMode}
-        nodesConnectable={!isPanMode}
-        elementsSelectable={!isPanMode}
+        nodesConnectable={false}
+        elementsSelectable={false}
         selectionMode={SelectionMode.Full}
         panOnDrag={isPanMode}
         zoomOnScroll={true}
         zoomOnDoubleClick={true}
-        selectionOnDrag={!isPanMode}
-        selectionKeyCode="Control"
-        multiSelectionKeyCode="Control"
-        nodesFocusable={!isPanMode}
+        selectionOnDrag={false}
+        selectionKeyCode={null}
+        multiSelectionKeyCode={null}
+        nodesFocusable={false}
         edgesFocusable={false}
         edgesUpdatable={false}
         onInit={(instance) => {
@@ -612,6 +620,7 @@ const FlowInner = () => {
           setIsLoading={setIsLoading}
           selectedNodes={selectedNodes}
           mergeNodes={mergeNodes}
+          isMerging={isMerging}
         />
 
         {toastMessage && (
