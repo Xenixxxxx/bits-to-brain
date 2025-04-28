@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useReactFlow } from 'reactflow';
+import './recommend-button.css';
 
 export const NodeDetails = ({ 
   selectedNode, 
@@ -8,12 +9,38 @@ export const NodeDetails = ({
   onRecommend, 
   onConfirm,
   hasRecommendations,
-  hasPendingRecommendations
+  hasPendingRecommendations,
+  isLoading
 }) => {
+  const [activeTab, setActiveTab] = useState('content');
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [canRecommend, setCanRecommend] = useState(false);
   const detailsRef = useRef(null);
   const { getNode, getViewport } = useReactFlow();
 
-  // 更新气泡位置的函数
+  const convertToEmbedUrl = (url) => {
+    return url.replace('watch?v=', 'embed/');
+  }
+
+  const handlePrevVideo = () => {
+    setCurrentVideoIndex(prev => 
+      prev === 0 ? selectedNode.detail.extra.video_urls.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextVideo = () => {
+    setCurrentVideoIndex(prev => 
+      prev === selectedNode.detail.extra.video_urls.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const handleCancelRecommend = () => {
+    setCanRecommend(false);
+    if (window.clearRecommendations) {
+      window.clearRecommendations();
+    }
+  };
+
   const updateBubblePosition = useCallback(() => {
     if (selectedNode && detailsRef.current) {
       const node = getNode(selectedNode.id);
@@ -24,23 +51,38 @@ export const NodeDetails = ({
 
         if (nodeElement) {
           const nodeRect = nodeElement.getBoundingClientRect();
+          const detailsRect = detailsElement.getBoundingClientRect();
+          const windowWidth = window.innerWidth;
+          const windowHeight = window.innerHeight;
           
-          // 计算节点在视口中的位置
           const nodeScreenPosition = {
             x: node.position.x * viewport.zoom + viewport.x,
             y: node.position.y * viewport.zoom + viewport.y
           };
 
-          // 计算气泡位置（气泡底部与节点顶部对齐，水平中心对齐）
-          const bubblePosition = {
-            x: nodeScreenPosition.x + (nodeRect.width * viewport.zoom) / 2, // 使用节点的实际宽度
-            y: nodeScreenPosition.y - 10 // 留出 10px 的间距
+          let bubblePosition = {
+            x: nodeScreenPosition.x + (nodeRect.width * viewport.zoom) / 2,
+            y: nodeScreenPosition.y - 10
           };
 
-          // 更新气泡位置
+          // 检查右边界
+          if (bubblePosition.x + detailsRect.width / 2 > windowWidth) {
+            bubblePosition.x = windowWidth - detailsRect.width / 2;
+          }
+          // 检查左边界
+          if (bubblePosition.x - detailsRect.width / 2 < 0) {
+            bubblePosition.x = detailsRect.width / 2;
+          }
+          // 检查上边界
+          if (bubblePosition.y - detailsRect.height < 0) {
+            bubblePosition.y = nodeScreenPosition.y + nodeRect.height * viewport.zoom + 10;
+            detailsElement.style.transform = 'translate(-50%, 0)';
+          } else {
+            detailsElement.style.transform = 'translate(-50%, -100%)';
+          }
+
           detailsElement.style.left = `${bubblePosition.x}px`;
           detailsElement.style.top = `${bubblePosition.y}px`;
-          detailsElement.style.transform = 'translate(-50%, -100%)'; // 向上偏移整个气泡的高度，水平居中
         }
       }
     }
@@ -50,12 +92,10 @@ export const NodeDetails = ({
     if (selectedNode && detailsRef.current) {
       const detailsElement = detailsRef.current;
 
-      // 初始动画
       detailsElement.style.width = '0px';
       detailsElement.style.height = '0px';
       detailsElement.style.opacity = '0';
 
-      // 触发动画
       requestAnimationFrame(() => {
         detailsElement.style.transition = 'all 0.3s ease-out';
         detailsElement.style.width = '500px';
@@ -64,26 +104,21 @@ export const NodeDetails = ({
         detailsElement.style.opacity = '1';
       });
 
-      // 自动获取推荐
-      if (!selectedNode.data.isRecommendation && !hasPendingRecommendations) {
-        // 使用 setTimeout 确保在动画开始后再调用推荐
+      if (!selectedNode.data.isRecommendation && !hasPendingRecommendations && canRecommend) {
         setTimeout(() => {
           onRecommend();
         }, 100);
       }
 
-      // 添加视口变化监听
       const reactFlowInstance = document.querySelector('.react-flow');
       if (reactFlowInstance) {
         reactFlowInstance.addEventListener('mousemove', updateBubblePosition);
         reactFlowInstance.addEventListener('wheel', updateBubblePosition);
       }
 
-      // 初始定位
       updateBubblePosition();
     }
 
-    // 清理监听器
     return () => {
       const reactFlowInstance = document.querySelector('.react-flow');
       if (reactFlowInstance) {
@@ -91,11 +126,10 @@ export const NodeDetails = ({
         reactFlowInstance.removeEventListener('wheel', updateBubblePosition);
       }
     };
-  }, [selectedNode, hasPendingRecommendations, onRecommend, updateBubblePosition]);
+  }, [selectedNode, hasPendingRecommendations, onRecommend, updateBubblePosition, canRecommend]);
 
   if (!selectedNode) return null;
 
-  // Get content based on node type
   const content = selectedNode.data.isRecommendation 
     ? selectedNode.data.summary 
     : selectedNode.detail?.text || '';
@@ -110,7 +144,7 @@ export const NodeDetails = ({
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
         padding: '16px',
         width: '500px',
-        maxHeight: '600px',
+        maxHeight: '450px',
         overflow: 'auto',
         zIndex: 5,
         cursor: 'default',
@@ -128,21 +162,99 @@ export const NodeDetails = ({
         marginBottom: '12px',
         paddingBottom: '8px',
         borderBottom: '1px solid #e5e7eb',
-        flexShrink: 0
+        flexShrink: 0,
+        height: '30px'
       }}>
-        {/* <h3 style={{ 
-          margin: 0, 
-          fontSize: '1.25rem', 
-          fontWeight: '600',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          maxWidth: '450px',
-          fontFamily: 'Inter, sans-serif',
-          color: 'rgb(61,60,61)'
+        <div style={{
+          display: 'flex',
+          justifyContent: 'flex-start',
+          gap: '8px'
         }}>
-          {selectedNode.data.label}
-        </h3> */}
+          <button
+            onClick={() => setActiveTab('content')}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              color: activeTab === 'content' ? '#272343' : '#6b7280',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              backgroundColor: activeTab === 'content' ? '#e3f6f5' : 'transparent',
+              fontFamily: 'Inter, sans-serif'
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== 'content') e.target.style.backgroundColor = 'rgba(108, 99, 255, 0.2)'
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== 'content') e.target.style.backgroundColor = 'transparent'
+            }}
+          >
+            Content
+          </button>
+          <button
+            onClick={() => setActiveTab('video')}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              color: activeTab === 'video' ? '#272343' : '#6b7280',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              backgroundColor: activeTab === 'video' ? '#e3f6f5' : 'transparent',
+              fontFamily: 'Inter, sans-serif',
+              visibility: selectedNode.data?.isRecommendation ? 'hidden' : 'visible',
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== 'video') e.target.style.backgroundColor = 'rgba(108, 99, 255, 0.2)'
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== 'video') e.target.style.backgroundColor = 'transparent'
+            }}
+          >
+            Video
+          </button>
+          <button
+            onClick={() => setActiveTab('other')}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              color: activeTab === 'other' ? '#272343' : '#6b7280',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              backgroundColor: activeTab === 'other' ? '#e3f6f5' : 'transparent',
+              fontFamily: 'Inter, sans-serif',
+              visibility: selectedNode.data?.isRecommendation ? 'hidden' : 'visible',
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== 'other') e.target.style.backgroundColor = 'rgba(108, 99, 255, 0.2)'
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== 'other') e.target.style.backgroundColor = 'transparent'
+            }}
+          >
+            Other
+          </button>
+          <button className='recommend-button'
+            onClick={() => {
+              if (hasPendingRecommendations) {
+                handleCancelRecommend();
+              } else {
+                setCanRecommend(true);
+              }
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"></path>
+            </svg>
+            <div className="recommend-text">
+              {hasPendingRecommendations ? 'Cancel' : 'Discover'}
+            </div>
+          </button>
+        </div>
         <button 
           onClick={onClose}
           style={{
@@ -159,19 +271,146 @@ export const NodeDetails = ({
         </button>
       </div>
 
-      <div style={{
-        flex: 1,
-        overflow: 'auto',
-        marginBottom: '12px',
-        fontSize: '0.875rem',
-        lineHeight: '1.5',
-        color: 'rgb(61,60,61)',
-        fontFamily: 'Inter, sans-serif'
-      }}>
-        <ReactMarkdown>
-          {content}
-        </ReactMarkdown>
-      </div>
+      {activeTab === 'content' ? (
+        <div style={{
+          flex: 1,
+          overflow: 'auto',
+          marginBottom: '12px',
+          fontSize: '0.875rem',
+          lineHeight: '1.5',
+          color: 'rgb(61,60,61)',
+          fontFamily: 'Inter, sans-serif',
+          maxHeight: '250px'
+        }}>
+          <ReactMarkdown>
+            {content}
+          </ReactMarkdown>
+        </div>
+      ) : activeTab === 'video' ? (
+        <div style={{
+          flex: 1,
+          overflow: 'hidden',
+          marginBottom: '12px',
+          maxHeight: '250px',
+          position: 'relative'
+        }}>
+          {selectedNode.detail.extra.video_urls && selectedNode.detail.extra.video_urls.length > 0 ? (
+            <>
+              <button
+                onClick={handlePrevVideo}
+                style={{
+                  position: 'absolute',
+                  left: '0px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'white',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  zIndex: 1,
+                  visibility: currentVideoIndex === 0 ? 'hidden' : 'visible'
+                }}
+              >
+                <img 
+                  src="https://api.iconify.design/fluent:chevron-left-24-regular.svg" 
+                  alt="Previous" 
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    filter: 'invert(0.2)'
+                  }}
+                />
+              </button>
+              <iframe 
+                width="100%" 
+                height="250" 
+                src={convertToEmbedUrl(selectedNode.detail.extra.video_urls[currentVideoIndex])} 
+                frameBorder="0" 
+                allowFullScreen
+                style={{
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  backgroundColor: 'white'
+                }}
+              />
+              <button
+                onClick={handleNextVideo}
+                style={{
+                  position: 'absolute',
+                  right: '0px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'white',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  zIndex: 1,
+                  visibility: currentVideoIndex === selectedNode.detail.extra.video_urls.length - 1 ? 'hidden' : 'visible'
+                }}
+              >
+                <img 
+                  src="https://api.iconify.design/fluent:chevron-right-24-regular.svg" 
+                  alt="Next" 
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    filter: 'invert(0.2)'
+                  }}
+                />
+              </button>
+              <div style={{
+                position: 'absolute',
+                bottom: '8px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(0, 0, 0, 0.6)',
+                color: 'white',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '0.75rem'
+              }}>
+                {currentVideoIndex + 1} / {selectedNode.detail.extra.video_urls.length}
+              </div>
+            </>
+          ) : (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              color: '#6b7280',
+              fontSize: '0.875rem'
+            }}>
+              No video available
+            </div>
+          )}
+        </div>
+      ) : (
+        <div style={{
+          flex: 1,
+          overflow: 'hidden',
+          marginBottom: '12px',
+          maxHeight: '250px'
+        }}>
+          {selectedNode.detail && selectedNode.detail.extra.website_urls ? selectedNode.detail.extra.website_urls.map(url => (
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              {url}
+            </a>
+          )) : ''}
+        </div>
+      )}
 
       <div style={{
         display: 'flex',

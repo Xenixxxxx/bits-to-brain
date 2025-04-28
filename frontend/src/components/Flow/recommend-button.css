@@ -1,0 +1,34 @@
+.recommend-button {
+    background-color: #e3f6f5;
+    color: #2d334a;
+    width: 8.5em;
+    height: 2.9em;
+    border: #bae8e8 0.2em solid;
+    border-radius: 11px;
+    text-align: right;
+    transition: all 0.6s ease;
+    margin-left: 50%;
+  }
+  
+  .recommend-button:hover {
+    border: #094074 0.2em solid;
+    background-color: #094074;
+    cursor: pointer;
+    color: #bae8e8;
+  }
+  
+  .recommend-button svg {
+    width: 1.6em;
+    margin: -0.2em -0.2em 0.2em;
+    position: absolute;
+    display: flex;
+    transition: all 0.6s ease;
+  }
+  
+  .recommend-button:hover svg {
+    transform: translateX(5px);
+  }
+  
+  .recommend-text {
+    margin: 0 2.5em
+  }

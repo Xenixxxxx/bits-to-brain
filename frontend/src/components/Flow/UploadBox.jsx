@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { upload } from '../../api';
-import { FaFileUpload, FaFileAlt } from 'react-icons/fa';
+import './upload-button.css';
 
-export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
+export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNodes, mergeNodes, isMerging }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [textInput, setTextInput] = useState('');
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -30,15 +31,21 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
         formData.append('file', file);
       }
 
-      await upload(formData);
-      setTextInput('');
-      setFile(null);
-      setFileName('');
-      setSelectedOption(null);
-      setShowOptions(false);
-      onUploadSuccess();
+      const response = await upload(formData);
+      
+      if (response) {
+        setTextInput('');
+        setFile(null);
+        setFileName('');
+        setSelectedOption(null);
+        setShowOptions(false);
+        onUploadSuccess();
+      } else {
+        throw new Error('Upload failed');
+      }
     } catch (error) {
       console.error('Error uploading:', error);
+      alert('Upload failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -47,49 +54,78 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
   return (
     <div style={{
       position: 'absolute',
-      bottom: '20%',
+      bottom: '10%',
       width: '100%',
-      left: '50%',
+      height: '5%',
+      left: '0%',
       zIndex: 1000,
-      fontFamily: 'Inter, sans-serif'
+      fontFamily: 'Inter, sans-serif',
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '8px',
     }}>
-      <div style={{
-        display: 'flex',
-        gap: '8px'
-      }}>
-        <button
+    <button className="upload-button-bl"
+            onClick={() => {
+              setShowOptions(true);
+              setSelectedOption(null);
+            }}
+            disabled={isLoading}>
+      <svg
+        aria-hidden="true"
+        stroke="currentColor"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeWidth="2"
+          stroke="#fffffff"
+          d="M13.5 3H12H8C6.34315 3 5 4.34315 5 6V18C5 19.6569 6.34315 21 8 21H11M13.5 3L19 8.625M13.5 3V7.625C13.5 8.17728 13.9477 8.625 14.5 8.625H19M19 8.625V11.8125"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        ></path>
+        <path
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          strokeWidth="2"
+          stroke="#fffffff"
+          d="M17 15V18M17 21V18M17 18H14M17 18H20"
+        ></path>
+      </svg>
+      UPLOAD
+    </button>
+
+      {selectedNodes.length > 0 && (
+        <button className="upload-button-yl"
           onClick={() => {
-            setShowOptions(true);
-            setSelectedOption(null);
+            mergeNodes();
           }}
-          disabled={isLoading}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#272343',
-            color: '#fffffe',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            opacity: isLoading ? 0.5 : 1,
-            fontFamily: 'Inter, sans-serif'
-          }}
+          disabled={isLoading || isMerging}
         >
-          <img 
-            src="https://api.iconify.design/fluent:upload-24-filled.svg" 
-            alt="Upload" 
-            style={{
+          {isMerging ? (
+            <div className="loading-spinner" style={{
               width: '20px',
               height: '20px',
-              filter: 'invert(1)'
-            }}
-          />
-          Upload
+              border: '2px solid #272343',
+              borderTop: '2px solid transparent',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+          ) : (
+            <img 
+              src="https://api.iconify.design/fluent:merge-24-filled.svg" 
+              alt="Merge" 
+              style={{
+                width: '20px',
+                height: '20px',
+                filter: 'invert(0.2)'
+              }}
+            />
+          )}
+          {isMerging ? 'Merging...' : 'Merge'}
         </button>
-      </div>
+      )}
 
       {showOptions && (
         <div style={{
@@ -103,7 +139,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 1001,
-          fontFamily: 'Inter, sans-serif'
+          fontFamily: 'Inter, sans-serif',
+          pointerEvents: 'auto'
         }}>
           <div style={{
             backgroundColor: 'rgb(248,234,212)',
@@ -124,7 +161,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '16px'
+              gap: '16px',
+              pointerEvents: 'auto'
             }}>
               <div style={{
                 display: 'flex',
@@ -195,7 +233,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
                   padding: '24px',
                   textAlign: 'center',
                   cursor: 'pointer',
-                  fontFamily: 'Inter, sans-serif'
+                  fontFamily: 'Inter, sans-serif',
+                  pointerEvents: 'auto'
                 }}
                 onDragOver={(e) => {
                   e.preventDefault();
@@ -206,14 +245,16 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
                   e.stopPropagation();
                   const file = e.dataTransfer.files[0];
                   if (file) {
-                    handleFileChange(e);
+                    setFile(file);
+                    setFileName(file.name);
                   }
                 }}
                 onClick={() => {
-                  // This is a placeholder for the file input
+                  fileInputRef.current?.click();
                 }}
                 >
                   <input
+                    ref={fileInputRef}
                     type="file"
                     onChange={handleFileChange}
                     style={{ display: 'none' }}
@@ -233,7 +274,7 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
                     color: 'rgb(61,60,61)',
                     fontFamily: 'Inter, sans-serif'
                   }}>
-                    Drag and drop a file here, or click to select
+                    {fileName || 'Drag and drop a file here, or click to select'}
                   </p>
                 </div>
               ) : selectedOption === 'text' ? (
@@ -250,7 +291,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading }) => {
                     resize: 'none',
                     backgroundColor: 'white',
                     color: 'rgb(61,60,61)',
-                    fontFamily: 'Inter, sans-serif'
+                    fontFamily: 'Inter, sans-serif',
+                    pointerEvents: 'auto'
                   }}
                 />
               ) : ('')}

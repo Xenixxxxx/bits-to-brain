@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { sendMessage } from '../api/chat';
 import ReactMarkdown from 'react-markdown';
+import { fetchNodeDetail } from '../api';
 
 export const ChatDialog = () => {
   const [messages, setMessages] = useState([]);
@@ -16,6 +17,11 @@ export const ChatDialog = () => {
     scrollToBottom();
   }, [messages]);
 
+  const convertToVideoUrl = (videoId) => {
+    const baseurl = "https://www.videoindexer.ai/embed/player/914a5e40-8e73-4e7a-8d13-ff0193a05e75/videoId/?&locale=en&location=trial";
+    return baseurl.replace('videoId', videoId);
+  }
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -26,7 +32,11 @@ export const ChatDialog = () => {
 
     try {
       const sessionId = sessionStorage.getItem('sessionId');
-      const response = await sendMessage(input, { sessionId });
+      const selectedNode = window.getSelectedNode?.();
+      const response = await sendMessage(input, { 
+        sessionId,
+        selectedNodeId: selectedNode?.id
+      });
       
       // Handle different response formats
       if (response.buttons) {
@@ -44,18 +54,34 @@ export const ChatDialog = () => {
         }]);
       }
 
-      // 刷新流程图，但保持节点选中状态
       if (window.refreshFlow) {
         const currentSelectedNode = window.getSelectedNode?.();
-        window.refreshFlow();
         if (currentSelectedNode) {
-          // 等待刷新完成后重新选中节点
-          setTimeout(() => {
-            window.setSelectedNode?.(currentSelectedNode);
-          }, 100);
+          await window.refreshFlow();
+
+          let detail = await fetchNodeDetail(currentSelectedNode.id);
+
+          const extra_formed = {
+            ...detail.extra,
+            video_urls: [
+              ...(detail.extra.video_ids ? detail.extra.video_ids.map(item => convertToVideoUrl(item)) : []),  
+              ...(detail.extra.youtube_urls || [])                               
+            ],
+          }
+          detail = {
+            ...detail,
+            extra: extra_formed
+          }
+          window.setSelectedNode?.({
+            ...selectedNode,
+            detail,
+          });
+        } else {
+          window.refreshFlow();
         }
       }
-    } catch (error) {
+    } catch (_) {
+      console.error('Error processing message:', _);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: 'Sorry, there was an error processing your message.'
@@ -76,25 +102,36 @@ export const ChatDialog = () => {
 
     try {
       const sessionId = sessionStorage.getItem('sessionId');
-      const response = await sendMessage(button.value || button.label, { sessionId });
+      const selectedNode = window.getSelectedNode?.();
+      const response = await sendMessage(button.value || button.label, { 
+        sessionId,
+        selectedNodeId: selectedNode?.id
+      });
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: response.content,
         buttons: response.buttons
       }]);
 
-      // 刷新流程图，但保持节点选中状态
+
       if (window.refreshFlow) {
         const currentSelectedNode = window.getSelectedNode?.();
-        window.refreshFlow();
         if (currentSelectedNode) {
-          // 等待刷新完成后重新选中节点
-          setTimeout(() => {
-            window.setSelectedNode?.(currentSelectedNode);
-          }, 100);
+
+          await window.refreshFlow();
+
+          const updatedNode = await fetchNodeDetail(currentSelectedNode.id);
+
+          window.setSelectedNode?.({
+            ...currentSelectedNode,
+            detail: updatedNode
+          });
+        } else {
+          window.refreshFlow();
         }
       }
     } catch (error) {
+      console.error('Error processing button click:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: 'Sorry, there was an error processing your selection.'

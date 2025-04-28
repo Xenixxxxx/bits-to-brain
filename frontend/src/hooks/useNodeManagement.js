@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { fetchGraphData, fetchNodeDetail, fetchRecommendation, confirmNode } from '../api';
+import { useCallback } from 'react';
+import { fetchGraphData, fetchRecommendation, confirmNode } from '../api';
 import { v4 as uuid } from 'uuid';
 
 export const useNodeManagement = ({
@@ -46,7 +46,9 @@ export const useNodeManagement = ({
               isRecommendation: true,
               sourceNodeId: selectedNode.id,
               title: rec.title,
-              summary: rec.summary
+              summary: rec.summary,
+              size: 80,
+              isSelected: false
             },
           };
         });
@@ -98,12 +100,9 @@ export const useNodeManagement = ({
         confirmedNode.id
       );
 
-      // 使用 fetchData 函数更新图，但保持推荐节点的位置
       const data = await fetchGraphData();
       if (data) {
-        // 更新节点和边
         const updatedNodes = data.nodes.map(node => {
-          // 其他节点使用原有位置或计算新位置
           return {
             id: node.uuid,
             type: 'markdown',
@@ -114,7 +113,9 @@ export const useNodeManagement = ({
             data: {
               label: node.title,
               content: node.title,
-              isRecommendation: false
+              isRecommendation: false,
+              isSelected: false,
+              size: 80
             }
           };
         });
