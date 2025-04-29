@@ -26,16 +26,16 @@ function App() {
         flex: 1,
         overflow: 'hidden'
       }}>
-        <div style={{ 
-          width: '80%', 
+        <div style={{
+          width: '75%',
           height: '100%',
           position: 'relative',
           backgroundColor: 'hsl(0, 0.00%, 100.00%)'
         }}>
           <Flow />
         </div>
-        <div style={{ 
-          width: '20%', 
+        <div style={{
+          width: '25%',
           height: '100%',
           borderLeft: '1px solid rgb(0, 0, 0)',
           backgroundColor: 'rgb(61,60,61)'

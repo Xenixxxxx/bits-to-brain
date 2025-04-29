@@ -13,5 +13,5 @@ public class Const {
     public static final String TEXT_PARSER_NAME = "text_parser";
     public static final String VIDEO_PARSER_NAME = "video_parser";
     public static final String YOUTUBE_PARSER_NAME = "youtubeVideoParser";
-
+    public static final String IMAGE_PARSER_NAME = "image_parser";
 }

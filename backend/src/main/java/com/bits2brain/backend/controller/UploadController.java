@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,10 +36,9 @@ public class UploadController {
             if (contentType == null) {
                 return ResponseEntity.badRequest().body("Unsupported file type.");
             }
-            // TODO: implement it
             if (contentType.startsWith("image/")) {
-                return ResponseEntity.badRequest().body("Unsupported file type: " + contentType);
-
+                inputMap.put("file", file);
+                parserName = IMAGE_PARSER_NAME;
             } else if (contentType.startsWith("video/")) {
                 inputMap.put("file", file);
                 parserName = VIDEO_PARSER_NAME;
