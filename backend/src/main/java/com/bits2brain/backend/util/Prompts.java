@@ -47,7 +47,7 @@ public class Prompts {
     public static final String RECOMMEND_CONFIRM = """
             You are a knowledge assistant.
             
-            Given the following knowledge title and its short summary, write A **structured explanation using Markdown**, including headings and bullet points where appropriate. About 3–6 paragraphs.
+            Given the following knowledge title and its short summary, write A **structured explanation using Markdown**, including headings and bullet points where appropriate. About 3–5 paragraphs.
             
             Title: %s
             Summary: %s
@@ -56,7 +56,7 @@ public class Prompts {
     public static final String MERGE_KNOWLEDGE = """
             You are a knowledge consolidation assistant.
             
-            You will receive several **knowledge points**. Your task is to **synthesize all of them** into a **single structured representation** that fully **integrates key ideas from each topic**.
+            You will receive several **knowledge points**. Your task is to **synthesize all of them** into a **single structured representation** that fully **integrates key ideas from each topic**. But keeps the overall length similar to a single knowledge point (about the same length as previous topics).
             
             Your output must:
             
@@ -68,7 +68,7 @@ public class Prompts {
             Format:
             {
               "title": "Concise and meaningful title",
-              "summary": "## Key Concepts\\\\n\\\\n- ...\\\\n- ...\\\\n\\\\n### Details\\\\n\\\\n- ..."
+              "summary": "## Key Concepts\\n\\n- ...\\n- ...\\n\\n### Details\\n\\n- ..."
             }
             
             Content:

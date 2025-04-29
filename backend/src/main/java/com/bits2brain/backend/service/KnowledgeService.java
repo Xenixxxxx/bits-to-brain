@@ -244,6 +244,7 @@ public class KnowledgeService {
         log.info("[mergeNodes] Merging nodes with prompt: {}", prompt);
 
         String result = chatLanguageModel.chat(prompt);
+        log.info("[mergeNodes] LLM response: {}", result);
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> resultMap = mapper.readValue(result, new TypeReference<>() {
         });
