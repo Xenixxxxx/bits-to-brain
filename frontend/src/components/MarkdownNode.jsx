@@ -7,7 +7,7 @@ export const MarkdownNode = ({ data }) => {
   return (
     <div
       style={{
-        padding: '2px', 
+        padding: '2px 8px', 
         borderRadius: '12px', 
         backgroundColor: data.isSelected 
           ? '#ffd803' 
@@ -87,16 +87,6 @@ export const MarkdownNode = ({ data }) => {
         transition: 'all 0.3s ease-in-out'
       }}>
         {data.label}
-      </div>
-      <div style={{
-        fontSize: '12px',
-        color: 'rgb(255, 255, 255)',
-        fontFamily: 'Inter, sans-serif',
-        maxWidth: '100px',  
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap'
-      }}>
       </div>
       <Handle
         type="source"
