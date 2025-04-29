@@ -25,4 +25,5 @@ export const sendMessage = async (message, options = {}) => {
     console.error('Error sending message:', error);
     throw error;
   }
+  
 }; 
