@@ -21,13 +21,12 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL}
     container_name: frontend-dev
     restart: always
     ports:
       - "80:80"
-    environment:
-      - REACT_APP_ENV=PROD
-      - REACT_APP_API_URL=${REACT_APP_API_URL}
 
   neo4j:
     image: neo4j:5.15

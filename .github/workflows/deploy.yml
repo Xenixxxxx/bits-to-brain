@@ -20,6 +20,10 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
+      - name: Create .env file
+        run: |
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
+
       - name: SSH and Deploy
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
@@ -42,8 +46,4 @@ jobs:
 
             echo "Deployment done!"
           EOF
-
-      - name: Create .env file
-        run: |
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
 
