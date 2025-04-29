@@ -21,11 +21,12 @@ export const Logo = () => {
           style={{
             width: '32px',
             height: '32px',
+            color: '#272343',
             // filter: 'invert(1)'
           }}
         />
         <span style={{
-          fontSize: '1.25rem',
+          fontSize: '32px',
           fontWeight: '600',
           color: '#272343',
           fontFamily: 'Inter, sans-serif'

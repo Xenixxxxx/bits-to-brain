@@ -19,19 +19,19 @@ export const MarkdownNode = ({ data }) => {
               ? '#fffffe'
               : '#bae8e8',
         border: data.isSelected
-          ? '2px solid #272343'
+          ? '0.5px solid #272343'
           : data.isRecommendation
             ? '1px dashed #000000'
             : '0.2px solid #000000',
         boxShadow: data.isSelected
-          ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 2px #272343, 0 0 30px 10px rgba(255, 216, 3, 0.2), 0 0 60px 20px rgba(255, 216, 3, 0.1), 0 0 90px 30px rgba(255, 216, 3, 0.05)'
+          ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 2px #272343, 0 0 30px 10px rgba(255,246,176, 0.2), 0 0 60px 20px rgba(255,246,176, 0.1), 0 0 90px 30px rgba(255,246,176, 0.05)'
           : isHovered 
-            ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.1), 0 0 30px 10px rgba(255, 216, 3, 0.2), 0 0 60px 20px rgba(255, 216, 3, 0.1), 0 0 90px 30px rgba(255, 216, 3, 0.05)'
+            ? '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.1), 0 0 30px 10px rgba(255,246,176, 0.2), 0 0 60px 20px rgba(255,246,176, 0.1), 0 0 90px 30px rgba(255,246,176, 0.05)'
             : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.1), 0 0 10px 5px rgba(230, 230, 230, 0.2), 0 0 20px 10px rgba(180, 180, 180, 0.1), 0 0 30px 15px rgba(143, 143, 143, 0.05)',
         fontFamily: 'Inter, sans-serif',
         position: 'relative',
-        width: isHovered ? `${data.size * 2}px` : `${data.size * 1.5}px`,
-        height: isHovered ? `${data.size}px` : `${data.size * 0.67}px`, 
+        width: isHovered ? `${data.size * 1.8}px` : `${data.size * 1.5}px`,
+        height: isHovered ? `${data.size * 0.8}px` : `${data.size * 0.67}px`, 
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
@@ -75,7 +75,7 @@ export const MarkdownNode = ({ data }) => {
         id="target"
       />
       <div style={{
-        fontSize: isHovered ? `${data.size * 0.15}px` : `${data.size * 0.1}px`, 
+        fontSize: isHovered ? `14.4px` : `12px`, 
         fontWeight: '500',
         marginBottom: '2px',  
         color: '#2d334a',
@@ -83,7 +83,8 @@ export const MarkdownNode = ({ data }) => {
         maxWidth: '100%',  
         overflow: 'visible',  
         whiteSpace: 'normal',  
-        padding: '0 2px'  
+        padding: '0 2px',
+        transition: 'all 0.3s ease-in-out'
       }}>
         {data.label}
       </div>

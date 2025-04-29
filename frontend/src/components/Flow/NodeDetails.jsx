@@ -15,6 +15,10 @@ export const NodeDetails = ({
   const [activeTab, setActiveTab] = useState('content');
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [canRecommend, setCanRecommend] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isManuallyPositioned, setIsManuallyPositioned] = useState(false);
   const detailsRef = useRef(null);
   const { getNode, getViewport } = useReactFlow();
 
@@ -41,8 +45,39 @@ export const NodeDetails = ({
     }
   };
 
+  const handleMouseDown = useCallback((e) => {
+    if (e.target.closest('button') || e.target.closest('iframe')) return;
+    
+    const detailsElement = detailsRef.current;
+    if (!detailsElement) return;
+
+    const matrix = new WebKitCSSMatrix(getComputedStyle(detailsElement).transform);
+    const currentX = matrix.m41;
+    const currentY = matrix.m42;
+
+    const offsetX = e.clientX - currentX;
+    const offsetY = e.clientY - currentY;
+
+    setDragOffset({ x: offsetX, y: offsetY });
+    setIsDragging(true);
+    setIsManuallyPositioned(true);
+  }, []);
+
+  const handleMouseMove = useCallback((e) => {
+    if (!isDragging || !detailsRef.current) return;
+
+    const x = e.clientX - dragOffset.x;
+    const y = e.clientY - dragOffset.y;
+
+    setPosition({ x, y });
+  }, [isDragging, dragOffset]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
   const updateBubblePosition = useCallback(() => {
-    if (selectedNode && detailsRef.current) {
+    if (selectedNode && detailsRef.current && !isDragging && !isManuallyPositioned) {
       const node = getNode(selectedNode.id);
       if (node) {
         const viewport = getViewport();
@@ -65,28 +100,11 @@ export const NodeDetails = ({
             y: nodeScreenPosition.y - 10
           };
 
-          // 检查右边界
-          if (bubblePosition.x + detailsRect.width / 2 > windowWidth) {
-            bubblePosition.x = windowWidth - detailsRect.width / 2;
-          }
-          // 检查左边界
-          if (bubblePosition.x - detailsRect.width / 2 < 0) {
-            bubblePosition.x = detailsRect.width / 2;
-          }
-          // 检查上边界
-          if (bubblePosition.y - detailsRect.height < 0) {
-            bubblePosition.y = nodeScreenPosition.y + nodeRect.height * viewport.zoom + 10;
-            detailsElement.style.transform = 'translate(-50%, 0)';
-          } else {
-            detailsElement.style.transform = 'translate(-50%, -100%)';
-          }
-
-          detailsElement.style.left = `${bubblePosition.x}px`;
-          detailsElement.style.top = `${bubblePosition.y}px`;
+          setPosition(bubblePosition);
         }
       }
     }
-  }, [selectedNode, getNode, getViewport]);
+  }, [selectedNode, getNode, getViewport, isDragging, isManuallyPositioned]);
 
   useEffect(() => {
     if (selectedNode && detailsRef.current) {
@@ -97,7 +115,6 @@ export const NodeDetails = ({
       detailsElement.style.opacity = '0';
 
       requestAnimationFrame(() => {
-        detailsElement.style.transition = 'all 0.3s ease-out';
         detailsElement.style.width = '500px';
         detailsElement.style.height = 'auto';
         detailsElement.style.maxHeight = '600px';
@@ -112,21 +129,26 @@ export const NodeDetails = ({
 
       const reactFlowInstance = document.querySelector('.react-flow');
       if (reactFlowInstance) {
-        reactFlowInstance.addEventListener('mousemove', updateBubblePosition);
         reactFlowInstance.addEventListener('wheel', updateBubblePosition);
       }
 
       updateBubblePosition();
     }
 
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
     return () => {
       const reactFlowInstance = document.querySelector('.react-flow');
       if (reactFlowInstance) {
-        reactFlowInstance.removeEventListener('mousemove', updateBubblePosition);
         reactFlowInstance.removeEventListener('wheel', updateBubblePosition);
       }
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [selectedNode, hasPendingRecommendations, onRecommend, updateBubblePosition, canRecommend]);
+  }, [selectedNode, hasPendingRecommendations, onRecommend, updateBubblePosition, canRecommend, isDragging, handleMouseMove, handleMouseUp]);
 
   if (!selectedNode) return null;
 
@@ -137,6 +159,7 @@ export const NodeDetails = ({
   return (
     <div
       ref={detailsRef}
+      onMouseDown={handleMouseDown}
       style={{
         position: 'absolute',
         backgroundColor: 'white',
@@ -147,12 +170,14 @@ export const NodeDetails = ({
         maxHeight: '450px',
         overflow: 'auto',
         zIndex: 5,
-        cursor: 'default',
+        cursor: isDragging ? 'grabbing' : 'grab',
         display: 'flex',
         flexDirection: 'column',
         border: '1px solid #e5e7eb',
-        transform: 'translate(-50%, -100%)',
-        fontFamily: 'Inter, sans-serif'
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        fontFamily: 'Inter, sans-serif',
+        willChange: 'transform',
+        transition: isDragging ? 'none' : 'transform 0.3s ease-out'
       }}
     >
       <div style={{
@@ -280,11 +305,23 @@ export const NodeDetails = ({
           lineHeight: '1.5',
           color: 'rgb(61,60,61)',
           fontFamily: 'Inter, sans-serif',
-          maxHeight: '250px'
+          maxHeight: '250px',
+          cursor: 'default'
         }}>
-          <ReactMarkdown>
-            {content}
-          </ReactMarkdown>
+          <div style={{
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            MozUserSelect: 'none',
+            msUserSelect: 'none',
+            WebkitUserDrag: 'none',
+            khtmlUserDrag: 'none',
+            MozUserDrag: 'none',
+            OUserDrag: 'none',
+          }}>
+            <ReactMarkdown>
+              {content}
+            </ReactMarkdown>
+          </div>
         </div>
       ) : activeTab === 'video' ? (
         <div style={{

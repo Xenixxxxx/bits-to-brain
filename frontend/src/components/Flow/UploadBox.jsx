@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { upload } from '../../api';
-import './upload-button.css';
+import './uploadBox.css';
 
 export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNodes, mergeNodes, isMerging }) => {
   const [showOptions, setShowOptions] = useState(false);
@@ -93,7 +93,7 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
           d="M17 15V18M17 21V18M17 18H14M17 18H20"
         ></path>
       </svg>
-      UPLOAD
+      Upload
     </button>
 
       {selectedNodes.length > 0 && (
@@ -143,18 +143,19 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
           pointerEvents: 'auto'
         }}>
           <div style={{
-            backgroundColor: 'rgb(248,234,212)',
+            backgroundColor: '#E3F6F5',
             padding: '24px',
             borderRadius: '12px',
             width: '400px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           }}>
             <h3 style={{
               margin: '0 0 16px 0',
-              fontSize: '1.25rem',
+              fontSize: '24px',
               fontWeight: '600',
               color: 'rgb(61,60,61)',
-              fontFamily: 'Inter, sans-serif'
+              fontFamily: 'Inter, sans-serif',
+              textAlign: 'center'
             }}>
               Upload
             </h3>
@@ -182,7 +183,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px',
-                    fontFamily: 'Inter, sans-serif'
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: '14px'
                   }}
                 >
                   <img 
@@ -210,7 +212,8 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px',
-                    fontFamily: 'Inter, sans-serif'
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: '14px'
                   }}
                 >
                   <img 
@@ -272,16 +275,23 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
                   <p style={{
                     margin: '0',
                     color: 'rgb(61,60,61)',
-                    fontFamily: 'Inter, sans-serif'
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: '12px'
                   }}>
-                    {fileName || 'Drag and drop a file here, or click to select'}
+                    {fileName || (
+                      <>
+                        Drag and drop a video/image here <br />
+                        or click to select
+                      </>
+                    )}
                   </p>
                 </div>
               ) : selectedOption === 'text' ? (
                 <textarea
+                  className="upload-textarea"
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
-                  placeholder="Enter your text/url here..."
+                  placeholder={`Enter your text here...\n\nor Youtube Video link...\ne.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ\n\nor website link...\ne.g. https://en.wikipedia.org/wiki/Microsoft_Azure`}
                   style={{
                     width: '93%',
                     height: '200px',
@@ -289,7 +299,7 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
                     border: '1px solid rgb(61,60,61)',
                     borderRadius: '6px',
                     resize: 'none',
-                    backgroundColor: 'white',
+                    backgroundColor: '#FFFFFE',
                     color: 'rgb(61,60,61)',
                     fontFamily: 'Inter, sans-serif',
                     pointerEvents: 'auto'

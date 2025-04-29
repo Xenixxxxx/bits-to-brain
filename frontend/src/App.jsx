@@ -27,7 +27,7 @@ function App() {
         overflow: 'hidden'
       }}>
         <div style={{ 
-          width: '70%', 
+          width: '80%', 
           height: '100%',
           position: 'relative',
           backgroundColor: 'hsl(0, 0.00%, 100.00%)'
@@ -35,7 +35,7 @@ function App() {
           <Flow />
         </div>
         <div style={{ 
-          width: '30%', 
+          width: '20%', 
           height: '100%',
           borderLeft: '1px solid rgb(0, 0, 0)',
           backgroundColor: 'rgb(61,60,61)'

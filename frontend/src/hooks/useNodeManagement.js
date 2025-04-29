@@ -26,8 +26,8 @@ export const useNodeManagement = ({
         setHasPendingRecommendations(true);
         
         // Clear old recommendation nodes and edges
-        setNodes((nds) => nds.filter((node) => !node.data.isRecommendation));
-        setEdges((eds) => eds.filter((edge) => !edge.id.startsWith(`edge-${selectedNode.id}-`)));
+        // setNodes((nds) => nds.filter((node) => !node.data.isRecommendation));
+        // setEdges((eds) => eds.filter((edge) => !edge.id.startsWith(`edge-${selectedNode.id}-`)));
 
         recommendations.forEach((rec) => {
           rec.id = uuid();
