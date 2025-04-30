@@ -3,7 +3,12 @@ FROM openjdk:17-slim
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget ffmpeg ca-certificates && \
+    apt-get install -y --no-install-recommends \
+        python3 \
+        wget \
+        ffmpeg \
+        ca-certificates && \
+    ln -sf /usr/bin/python3 /usr/local/bin/python3 && \
     wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /usr/local/bin/yt-dlp && \
     chmod +x /usr/local/bin/yt-dlp && \
     rm -rf /var/lib/apt/lists/*
