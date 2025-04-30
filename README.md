@@ -5,7 +5,7 @@
 
 Is fragmented information just a waste of time?
 
-We are constantly exposed to scattered knowledge: a tip from a short video, an insightful point from a YouTube tutorial, a top answer on Reddit, or even a brief description next to a museum exhibit. These moments often pass by without leaving a lasting trace. **bits2brain** aims to change that — it's an AI-powered system that helps you automatically **capture knowledge from everyday life**, **form connections**, and gradually build **your own dynamic knowledge star map**. By linking your memory nodes with AI, your thinking becomes structured, visualized, and easy to navigate.
+We are constantly exposed to scattered knowledge: a tip from a short video, an insightful point from a YouTube tutorial, a piece of breaking news about the latest tech breakthrough, or even a brief description next to a museum exhibit. These moments often pass by without leaving a lasting trace. **bits2brain** aims to change that — it's an AI-powered system that helps you automatically **capture knowledge from everyday life**, **form connections**, and gradually build **your own dynamic knowledge star map**. By linking your memory nodes with AI, your thinking becomes structured, visualized, and easy to navigate.
 
 ---
 
@@ -49,7 +49,7 @@ We are constantly exposed to scattered knowledge: a tip from a short video, an i
 - **Database**: Neo4j — graph database for storing nodes and semantic connections
 - **Deployment**: Docker-based containers hosted on Azure Virtual Machine
 - **CI/CD**: GitHub Actions — for automatic build, image packaging, and deployment updates
-- **Natural Language & Generation**: Azure OpenAI Service — for dialogue, summarization, and node synthesis
+- **Natural Language Chat & Generation**: Azure OpenAI Service — for dialogue, summarization, and node synthesis
 - **Embedding & Retrieval**: Azure AI Embedding Models + Neo4j — semantic vector-based node search (RAG-style workflow)
 - **Image Processing**: Azure Computer Vision — OCR for extracting knowledge from photos or screenshots
 - **Video Analysis**: Azure Video Indexer — to parse videos and attach summaries/links to nodes

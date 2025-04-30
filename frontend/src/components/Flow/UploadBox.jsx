@@ -334,7 +334,7 @@ export const UploadBox = ({ onUploadSuccess, isLoading, setIsLoading, selectedNo
                       style={{
                         padding: '8px 16px',
                         backgroundColor: 'rgb(61,60,61)',
-                        color: '#272343',
+                        color: '#fffffe',
                         border: 'none',
                         borderRadius: '6px',
                         cursor: isLoading || (selectedOption === 'text' && !textInput.trim()) || (selectedOption === 'file' && !file) ? 'not-allowed' : 'pointer',
