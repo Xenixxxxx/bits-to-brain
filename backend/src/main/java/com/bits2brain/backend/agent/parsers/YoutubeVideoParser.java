@@ -18,11 +18,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.UUID;
 
 import static com.bits2brain.backend.util.Const.YOUTUBE_PARSER_NAME;
 import static com.bits2brain.backend.util.Prompts.SUBTITLE_EXTRACT;
@@ -58,14 +55,39 @@ public class YoutubeVideoParser implements Parser {
             Instant t1 = Instant.now();
 
             // Use yt-dlp to download auto-generated English subtitles only (VTT format)
+            log.info("[YoutubeVideoParser] Current working directory: {}", System.getProperty("user.dir"));
+
             String uniqueId = UUID.randomUUID().toString();
             String ytDlpOutput = "video_subs_" + uniqueId;
-            ProcessBuilder pb = new ProcessBuilder("yt-dlp",
+
+            String cookiesFilePath = "/app/backend/data/youtube_cookies.txt";
+            File cookiesFile = new File(cookiesFilePath);
+
+            List<String> command = new ArrayList<>();
+            command.add("yt-dlp");
+
+            if (cookiesFile.exists()) {
+                if (cookiesFile.length() < 100) {
+                    log.warn("[YoutubeVideoParser] Cookie file exists but looks too small (<100 bytes). Skipping it.");
+                } else {
+                    log.info("[YoutubeVideoParser] Using cookies from: {}", cookiesFilePath);
+                    command.add("--cookies");
+                    command.add(cookiesFilePath);
+                }
+            } else {
+                log.info("[YoutubeVideoParser] No cookies file found, running without authentication.");
+            }
+
+
+            command.addAll(List.of(
                     "--write-auto-sub",
                     "--sub-lang", "en",
                     "--skip-download",
                     "-o", ytDlpOutput + ".%(ext)s",
-                    url);
+                    url
+            ));
+
+            ProcessBuilder pb = new ProcessBuilder(command);
             pb.redirectErrorStream(true);
             Process process = pb.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));

@@ -41,7 +41,7 @@ services:
       - ./neo4j/plugins:/plugins
     healthcheck:
       test: [ "CMD-SHELL", "echo 'healthcheck passed'" ]
-      interval: 30s
+      interval: 10s
       timeout: 10s
       retries: 5
 

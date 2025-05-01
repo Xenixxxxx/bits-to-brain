@@ -9,7 +9,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     volumes:
-      - ./backend/data:/app/data
+      - ./backend/data:/app/backend/data
       - /opt/bits2brain/config/application.properties:/app/config/application.properties
     restart: always
     depends_on:

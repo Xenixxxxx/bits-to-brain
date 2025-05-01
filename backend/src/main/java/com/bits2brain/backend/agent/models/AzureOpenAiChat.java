@@ -42,7 +42,7 @@ public class AzureOpenAiChat {
             ChatLanguageModel chatModel = AzureOpenAiChatModel.builder().
                     openAIClient(openAIClient).
                     deploymentName(deploymentId).
-                    temperature(0.1).
+                    temperature(0.4).
                     maxTokens(MAX_TOKENS).
                     build();
 
