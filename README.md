@@ -7,6 +7,7 @@ Is fragmented information just a waste of time?
 
 We are constantly exposed to scattered knowledge: a tip from a short video, an insightful point from a YouTube tutorial, a piece of breaking news about the latest tech breakthrough, or even a brief description next to a museum exhibit. These moments often pass by without leaving a lasting trace. **bits2brain** aims to change that — it's an AI-powered system that helps you automatically **capture knowledge from everyday life**, **form connections**, and gradually build **your own dynamic knowledge star map**. By linking your memory nodes with AI, your thinking becomes structured, visualized, and easy to navigate.
 
+![Demo Screenshot](cover.png)
 ---
 
 ## Core Features
